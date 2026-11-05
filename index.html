@@ -1,0 +1,1213 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="政大計程車共乘 Demo：課表順風車、多點上車、安心同行、許願池、綠色點數。">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>政大計程車共乘 Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Chivo+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<style>
+/* Layout: night-navy presenter stage (guide + demo shortcuts on the left), a light phone app on the right. Taxi yellow for action, campus green for safety and carbon. One deliberate look in both themes. */
+:root {
+  --stage: #0D1630;
+  --stage-2: #16234A;
+  --stage-ink: #F3F1EA;
+  --stage-muted: #A7B0C6;
+  --stage-line: #283863;
+  --yellow: #F5B700;
+  --yellow-soft: #FFF0BF;
+  --yellow-text: #765500;
+  --navy: #13203C;
+  --navy-2: #1D2D55;
+  --paper: #F4F2EB;
+  --card: #FFFEFA;
+  --line: #E5E0D2;
+  --ink: #13203C;
+  --muted: #586075;
+  --green: #1D7A52;
+  --green-soft: #DCF0E4;
+  --red: #B8402B;
+  --red-soft: #F8E1DB;
+  --street: #DDD5C2;
+  --display: 'Bricolage Grotesque', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+  --body: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+  --mono: 'Chivo Mono', ui-monospace, 'SFMono-Regular', monospace;
+  --shadow: 0 1px 0 rgba(19, 32, 60, .04), 0 12px 24px -18px rgba(19, 32, 60, .5);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { background: var(--stage); }
+body {
+  background: var(--stage); color: var(--stage-ink); font-family: var(--body); font-size: 15px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px;
+}
+h1, h2, h3, p, ol, ul, dl, dd { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+.topband { height: 14px; margin: 0 calc(-1 * max(16px, env(safe-area-inset-left, 0px))) 40px; background: repeating-conic-gradient(var(--navy) 0 25%, var(--yellow) 0 50%) 0 0 / 14px 14px; }
+.stage { max-width: 1140px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) 410px; gap: 64px; align-items: start; }
+
+/* ---------- Presenter guide ---------- */
+.guide { display: flex; flex-direction: column; gap: 26px; min-width: 0; padding-top: 8px; }
+.namebox { width: min(100%, 340px); height: 88px; border: 2px dashed var(--stage-line); border-radius: 18px; display: grid; place-items: center; color: var(--stage-muted); font-size: 13px; letter-spacing: .14em; }
+.tagline { font-family: var(--display); font-weight: 800; font-size: clamp(30px, 3.6vw, 44px); line-height: 1.08; letter-spacing: -.02em; text-wrap: balance; max-width: 15em; }
+.tagline em { font-style: normal; color: var(--yellow); white-space: nowrap; }
+.glabel { font-size: 12px; font-weight: 700; letter-spacing: .16em; color: var(--stage-muted); text-transform: uppercase; }
+.flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; max-width: 520px; }
+.flow button { border: 1px solid var(--stage-line); background: transparent; color: var(--stage-muted); border-radius: 12px; padding: 9px 4px; font-weight: 700; font-size: 13px; display: flex; flex-direction: column; align-items: center; gap: 2px; transition: background .2s, color .2s; }
+.flow button span { font-family: var(--mono); font-size: 11px; }
+.flow button[aria-current="step"] { background: var(--yellow); border-color: var(--yellow); color: var(--navy); }
+.flow button.past { color: var(--stage-ink); border-color: var(--stage-ink); }
+.feats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; max-width: 520px; }
+.feat { border: 1px solid var(--stage-line); background: rgba(255, 255, 255, .02); border-radius: 14px; padding: 11px 13px; text-align: left; color: var(--stage-ink); display: flex; flex-direction: column; gap: 2px; transition: border-color .15s, background .15s; min-width: 0; }
+.feat:hover { border-color: var(--stage-ink); background: rgba(255, 255, 255, .05); }
+.feat b { font-size: 15px; }
+.feat span { font-size: 12px; color: var(--stage-muted); }
+.feat.on { border-color: var(--yellow); background: rgba(245, 183, 0, .08); }
+.guide-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.qr { display: flex; gap: 14px; align-items: center; border: 1px solid var(--stage-line); background: rgba(255, 255, 255, .03); border-radius: 18px; padding: 10px 18px 10px 10px; color: var(--stage-ink); text-align: left; }
+.qr:hover { border-color: var(--stage-ink); }
+.qr-img { width: 84px; height: 84px; background: #FFFFFF; border-radius: 10px; padding: 5px; flex: none; }
+.qr-img svg, .qr-big svg { width: 100%; height: 100%; display: block; }
+.qr-txt { display: flex; flex-direction: column; gap: 2px; }
+.qr-txt b { font-size: 16px; }
+.qr-txt span { font-size: 12px; color: var(--stage-muted); }
+.langseg { display: inline-flex; border: 1.5px solid var(--stage-line); border-radius: 999px; padding: 3px; }
+.langseg button { border: 0; background: transparent; color: var(--stage-muted); border-radius: 999px; padding: 7px 15px; font-weight: 700; }
+.langseg button[aria-pressed="true"] { background: var(--stage-ink); color: var(--navy); }
+.btn-stage { border: 1.5px solid var(--stage-line); background: transparent; color: var(--stage-ink); border-radius: 999px; padding: 9px 18px; font-weight: 700; }
+.btn-stage:hover { border-color: var(--stage-ink); }
+.qrover { position: fixed; inset: 0; z-index: 50; background: rgba(8, 14, 30, .94); display: grid; place-items: center; padding-block: 24px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.qrbox { background: #FFFFFF; color: var(--navy); border-radius: 28px; padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; width: min(100%, 480px); }
+.qr-big { width: 100%; aspect-ratio: 1; max-width: 100%; }
+.qrbox p { font-weight: 900; font-size: 22px; text-align: center; }
+.qrbox code { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; text-align: center; }
+
+/* ---------- Phone ---------- */
+.phone { color-scheme: light; position: relative; width: 410px; max-width: 100%; height: 860px; border: 11px solid #050912; border-radius: 52px; background: var(--paper); color: var(--ink); overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 0 0 1px #2B3B66, 0 0 0 4px #0A1122, 0 60px 100px -40px rgba(0, 0, 0, .95); position: sticky; top: 16px; }
+.notch { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); width: 110px; height: 30px; border-radius: 20px; background: #050912; z-index: 6; }
+.statusbar { display: flex; justify-content: space-between; align-items: center; padding: 14px 28px 8px; font-family: var(--mono); font-size: 13px; font-weight: 700; flex: none; }
+.phone.darktop .statusbar { background: var(--navy); color: var(--paper); }
+.sig { display: flex; gap: 3px; align-items: end; }
+.sig i { width: 4px; background: currentColor; border-radius: 1px; display: block; }
+.appbar { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; padding: 4px 12px 10px; flex: none; }
+.phone.darktop .appbar { display: none; }
+.appbar h2 { text-align: center; font-size: 17px; font-weight: 700; }
+.iconbtn { width: 42px; height: 42px; border-radius: 50%; border: 0; background: var(--card); box-shadow: 0 0 0 1px var(--line); display: grid; place-items: center; }
+.iconbtn svg { width: 20px; height: 20px; }
+.langpill { position: absolute; top: 51px; right: 20px; z-index: 5; height: 34px; min-width: 44px; padding: 0 11px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); font-weight: 700; font-size: 13px; }
+.phone.darktop .langpill { background: rgba(255, 255, 255, .1); border-color: rgba(255, 255, 255, .28); color: var(--paper); }
+.view { flex: 1; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; scrollbar-width: thin; }
+.view > * { flex-shrink: 0; }
+.pad { padding: 14px 16px 22px; display: flex; flex-direction: column; gap: 12px; }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.view.enter .pad > * { animation: rise .34s cubic-bezier(.2, .7, .2, 1) both; }
+.view.enter .pad > *:nth-child(2) { animation-delay: .04s; }
+.view.enter .pad > *:nth-child(3) { animation-delay: .08s; }
+.view.enter .pad > *:nth-child(n+4) { animation-delay: .12s; }
+.tabbar { flex: none; display: grid; grid-template-columns: repeat(5, 1fr); padding: 8px 6px 14px; background: var(--card); border-top: 1px solid var(--line); }
+.phone.signin .tabbar, .phone.signin .fab { display: none; }
+.tab { border: 0; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; font-weight: 700; color: #8A90A0; padding: 6px 0; position: relative; }
+.tab svg { width: 22px; height: 22px; }
+.tab[aria-current="page"] { color: var(--ink); }
+.tab[aria-current="page"]::before { content: ""; position: absolute; top: -9px; width: 26px; height: 3px; border-radius: 0 0 3px 3px; background: var(--yellow); }
+.fab { position: absolute; right: 16px; bottom: 90px; z-index: 4; border: 0; background: var(--yellow); color: var(--navy); border-radius: 999px; padding: 13px 20px 13px 16px; font-weight: 700; font-size: 15px; display: flex; gap: 6px; align-items: center; box-shadow: 0 14px 26px -10px rgba(19, 32, 60, .75); }
+.fab svg { width: 20px; height: 20px; }
+
+/* Shared parts */
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 15px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow); }
+.lbl { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--muted); }
+.val { font-size: 17px; font-weight: 700; line-height: 1.35; }
+.sub { font-size: 13px; color: var(--muted); }
+.h { font-size: 24px; font-weight: 900; line-height: 1.25; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.btn { border: 0; border-radius: 15px; padding: 14px 18px; font-weight: 700; font-size: 16px; display: inline-flex; justify-content: center; align-items: center; gap: 8px; transition: transform .12s, filter .15s; }
+.btn:active:not([disabled]) { transform: scale(.98); }
+.btn.primary { background: var(--yellow); color: var(--navy); box-shadow: 0 10px 20px -12px rgba(176, 126, 0, .9); }
+.btn.dark { background: var(--navy); color: var(--paper); }
+.btn.ghost { background: var(--card); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+.btn.ghost:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.btn.danger { background: var(--red); color: #FFFEFA; }
+.btn.sm { padding: 8px 14px; font-size: 13px; border-radius: 12px; }
+.btn[disabled] { opacity: .5; cursor: not-allowed; box-shadow: none; }
+.btn.block { width: 100%; }
+.btn svg { width: 18px; height: 18px; flex: none; }
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.field label, .flabel { font-size: 13px; font-weight: 700; }
+.input { width: 100%; padding: 12px 13px; border-radius: 13px; border: 1.5px solid var(--line); background: var(--card); font-size: 16px; appearance: none; }
+select.input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2313203C' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; background-size: 18px; padding-right: 38px; }
+.input:focus { border-color: var(--ink); outline: none; box-shadow: 0 0 0 4px rgba(245, 183, 0, .25); }
+.err { color: var(--red); font-size: 13px; font-weight: 700; }
+.tag { font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--yellow-soft); color: var(--yellow-text); white-space: nowrap; display: inline-flex; gap: 4px; align-items: center; }
+.tag svg { width: 12px; height: 12px; }
+.tag.ok { background: var(--green-soft); color: var(--green); }
+.tag.night { background: var(--navy); color: var(--paper); }
+.tag.pink { background: #F6E2EC; color: #8C2E5B; }
+.tag.grey { background: #ECE9E0; color: var(--muted); }
+.tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.av { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 700; color: #FFFEFA; flex: none; border: 2px solid var(--card); }
+.av.you { background: var(--yellow); color: var(--navy); font-size: 12px; }
+.av.bot { background: var(--navy); color: var(--yellow); }
+.av.bot svg { width: 60%; height: 60%; }
+.stack { display: flex; }
+.stack .av + .av { margin-left: -9px; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: #ECE9E0; border-radius: 13px; padding: 3px; gap: 3px; }
+.seg button { border: 0; background: transparent; border-radius: 10px; padding: 8px 6px; font-weight: 700; font-size: 13px; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--card); color: var(--ink); box-shadow: 0 1px 3px rgba(19, 32, 60, .15); }
+.toggle { position: relative; width: 46px; height: 28px; flex: none; }
+.toggle input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; z-index: 1; }
+.toggle span { position: absolute; inset: 0; border-radius: 999px; background: var(--street); transition: background .2s; }
+.toggle span::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #FFFEFA; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); transition: transform .2s; }
+.toggle input:checked + span { background: var(--green); }
+.toggle input:checked + span::after { transform: translateX(18px); }
+.toggle input:focus-visible + span { outline: 3px solid var(--yellow); outline-offset: 2px; }
+.setting { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 4px 0; }
+.setting > div { min-width: 0; }
+.setting b { display: block; font-size: 15px; }
+.setting span.sub { display: block; }
+.divider { height: 1px; background: var(--line); margin: 2px 0; }
+.checker { height: 12px; flex: none; background: repeating-conic-gradient(var(--navy) 0 25%, var(--yellow) 0 50%) 0 0 / 12px 12px; }
+.flash { animation: flash 1.4s ease 1; }
+@keyframes flash { 0%, 100% { box-shadow: var(--shadow); } 30% { box-shadow: 0 0 0 4px var(--yellow), var(--shadow); } }
+
+/* Sign in */
+.si-top { background: var(--navy); color: var(--paper); padding: 16px 22px 22px; display: flex; flex-direction: column; gap: 14px; }
+.si-name { width: 170px; height: 44px; border: 2px dashed rgba(255, 255, 255, .35); border-radius: 12px; }
+.si-top h2 { font-family: var(--display); font-size: 32px; line-height: 1.1; font-weight: 800; letter-spacing: -.01em; }
+.si-top h2 em { font-style: normal; color: var(--yellow); }
+.si-top p { color: #C3CBDD; font-size: 14px; }
+.linkbtn { border: 0; background: none; padding: 0; color: var(--yellow-text); font-weight: 700; font-size: 13px; text-decoration: underline; text-underline-offset: 3px; }
+.codebox { letter-spacing: .6em; font-family: var(--mono); font-size: 24px; font-weight: 700; text-align: center; }
+.assure { display: grid; gap: 8px; font-size: 13px; color: var(--muted); }
+.assure li { display: flex; gap: 8px; align-items: center; }
+.assure svg { width: 16px; height: 16px; color: var(--green); flex: none; }
+
+/* Home */
+.hero { background: var(--navy); color: var(--paper); padding: 4px 16px 16px; display: flex; flex-direction: column; gap: 12px; }
+.hero .hi { font-size: 13px; color: #C3CBDD; }
+.hero h2 { font-family: var(--display); font-size: 30px; font-weight: 800; line-height: 1.1; }
+.chips { display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; border: 1px solid rgba(255, 255, 255, .2); padding: 7px 13px; border-radius: 999px; font-size: 13px; font-weight: 700; background: transparent; color: var(--paper); white-space: nowrap; }
+.chip[aria-pressed="true"] { background: var(--yellow); color: var(--navy); border-color: var(--yellow); }
+.banner { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 11px 11px 15px; border-radius: 16px; background: var(--yellow); color: var(--navy); }
+.banner p { font-size: 14px; font-weight: 700; }
+.tt { background: linear-gradient(160deg, #FFFEFA, #FFF7DB); }
+.tt-class { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; }
+.tt-time { font-family: var(--mono); font-weight: 700; font-size: 13px; background: var(--navy); color: var(--yellow); border-radius: 10px; padding: 6px 8px; text-align: center; line-height: 1.2; }
+.section-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-top: 4px; }
+.section-head h3 { font-size: 17px; font-weight: 900; }
+.filter { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--muted); }
+.ride { text-align: left; border: 1px solid var(--line); background: var(--card); border-radius: 20px; padding: 13px; display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 11px; align-items: start; width: 100%; box-shadow: var(--shadow); transition: transform .2s, box-shadow .2s; }
+.ride:hover:not([disabled]) { transform: translateY(-2px); box-shadow: 0 18px 30px -20px rgba(19, 32, 60, .55); }
+.ride[disabled] { opacity: .55; cursor: default; box-shadow: none; }
+.ride.mine { border: 2px solid var(--yellow); padding: 12px; }
+.ico { width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(150deg, var(--navy-2), var(--navy)); color: var(--yellow); display: grid; place-items: center; }
+.ico svg { width: 22px; height: 22px; }
+.ride-main { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.ride-title { font-size: 16px; font-weight: 900; line-height: 1.3; }
+.ride-meta { font-size: 13px; color: var(--muted); }
+.ride-foot { display: flex; align-items: center; gap: 8px; margin-top: 4px; font-size: 12px; color: var(--muted); font-weight: 700; }
+.ride-price { text-align: right; display: flex; flex-direction: column; align-items: end; gap: 3px; }
+.price { font-family: var(--mono); font-weight: 700; font-size: 21px; line-height: 1; white-space: nowrap; }
+.price small { font-size: 11px; color: var(--muted); margin-right: 1px; }
+.ride-price em { font-style: normal; font-size: 11px; color: var(--muted); font-weight: 700; }
+.ride-price .word { font-size: 15px; font-weight: 900; }
+.empty { text-align: center; padding: 22px 14px; color: var(--muted); font-size: 14px; }
+
+/* Map and detail */
+.mapcard { padding: 0; overflow: hidden; gap: 0; }
+.mapcard svg { display: block; width: 100%; height: auto; }
+.timeline { padding: 12px 15px 14px; display: grid; gap: 0; }
+.tl { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: start; position: relative; padding-bottom: 12px; }
+.tl:last-child { padding-bottom: 0; }
+.tl:not(:last-child)::before { content: ""; position: absolute; left: 10px; top: 20px; bottom: 0; width: 2px; background: var(--street); }
+.tl i { width: 22px; height: 22px; border-radius: 50%; background: var(--navy); color: var(--paper); font-style: normal; font-family: var(--mono); font-size: 11px; font-weight: 700; display: grid; place-items: center; position: relative; z-index: 1; }
+.tl i.end { background: var(--yellow); color: var(--navy); border-radius: 6px; }
+.tl b { font-size: 15px; display: block; line-height: 1.35; }
+.tl .who { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+.tl .when { font-family: var(--mono); font-size: 12px; color: var(--muted); font-weight: 700; padding-top: 2px; }
+.pickstop { display: flex; flex-wrap: wrap; gap: 6px; }
+.pickstop button { border: 1.5px solid var(--line); background: var(--card); border-radius: 999px; padding: 7px 13px; font-size: 13px; font-weight: 700; }
+.pickstop button[aria-pressed="true"] { border-color: var(--navy); background: var(--navy); color: var(--paper); }
+.riders { display: flex; flex-wrap: wrap; gap: 12px; }
+.rider { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; color: var(--muted); width: 54px; text-align: center; font-weight: 700; }
+.rider .av { width: 40px; height: 40px; font-size: 15px; border: 0; }
+.rider .av.open { background: transparent; color: var(--muted); box-shadow: inset 0 0 0 1.5px var(--street); }
+.quote { font-size: 14px; color: var(--muted); background: var(--paper); padding: 9px 12px; border-radius: 12px; }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.fact { background: var(--paper); border-radius: 12px; padding: 8px 10px; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.fact span { font-size: 11px; color: var(--muted); font-weight: 700; }
+.fact b { font-size: 14px; }
+.receipt dl { display: grid; gap: 8px; }
+.receipt dl div { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; }
+.receipt dt { color: var(--muted); min-width: 0; }
+.receipt dd { font-weight: 700; white-space: nowrap; font-family: var(--mono); }
+.receipt .me dt, .receipt .me dd { color: var(--ink); font-weight: 900; }
+.receipt .total { border-top: 2px dashed var(--line); padding-top: 11px; margin-top: 3px; align-items: baseline; }
+.receipt .total dt { color: var(--ink); font-weight: 900; font-size: 16px; }
+.receipt .total dd { font-size: 26px; }
+.save-line { display: flex; gap: 8px; align-items: center; font-size: 14px; font-weight: 700; color: var(--green); background: var(--green-soft); padding: 9px 12px; border-radius: 12px; }
+.save-line svg { width: 18px; height: 18px; flex: none; }
+.actionbar { position: sticky; bottom: 0; margin-top: auto; padding: 12px 16px 16px; background: linear-gradient(to bottom, rgba(244, 242, 235, 0), var(--paper) 30%); z-index: 2; }
+
+/* Post */
+.stoprow { display: grid; grid-template-columns: 24px minmax(0, 1fr) 34px; gap: 8px; align-items: center; }
+.stoprow i { width: 22px; height: 22px; border-radius: 50%; background: var(--navy); color: var(--paper); font-style: normal; font-family: var(--mono); font-size: 11px; font-weight: 700; display: grid; place-items: center; }
+.stoprow i.end { background: var(--yellow); color: var(--navy); border-radius: 6px; }
+.rm { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--card); display: grid; place-items: center; color: var(--muted); }
+.rm svg { width: 16px; height: 16px; }
+.addstop { border: 1.5px dashed var(--street); background: transparent; border-radius: 12px; padding: 9px; font-weight: 700; font-size: 13px; color: var(--muted); }
+.addstop:hover { border-color: var(--ink); color: var(--ink); }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.stepper { display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; border: 1.5px solid var(--line); border-radius: 13px; background: var(--card); }
+.stepper button { border: 0; background: transparent; height: 44px; font-size: 20px; font-weight: 700; }
+.stepper output { text-align: center; font-family: var(--mono); font-weight: 700; font-size: 16px; }
+.est { background: var(--navy); color: var(--paper); border-radius: 16px; padding: 13px 15px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.est .sub { color: #C3CBDD; }
+.est .price { color: var(--yellow); font-size: 26px; }
+
+/* Trip */
+.progress { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.progress li { display: flex; flex-direction: column; gap: 5px; font-size: 12px; font-weight: 700; color: #8A90A0; }
+.progress li::before { content: ""; height: 6px; border-radius: 3px; background: var(--street); }
+.progress li.done { color: var(--ink); }
+.progress li.done::before { background: var(--navy); }
+.progress li.now { color: var(--ink); }
+.progress li.now::before { background: linear-gradient(90deg, var(--yellow) 0 60%, var(--street) 60%); }
+.taxi { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; }
+.plate { font-family: var(--mono); font-weight: 700; font-size: 18px; letter-spacing: .05em; padding: 5px 10px; border-radius: 8px; background: #FFFEFA; color: #C0281E; border: 2.5px solid #C0281E; white-space: nowrap; }
+.safe { border-color: #BFE0CC; background: linear-gradient(180deg, #F2FAF5, #FFFEFA 60%); }
+.safe-head { display: flex; align-items: center; gap: 10px; }
+.safe-head svg { width: 26px; height: 26px; color: var(--green); flex: none; }
+.rec { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--red); }
+.rec::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--red); animation: blink 1.2s infinite; }
+@keyframes blink { 50% { opacity: .2; } }
+.chat { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; }
+.chat.tall { max-height: none; min-height: 180px; }
+.msg { display: flex; gap: 8px; align-items: end; max-width: 88%; }
+.msg .av { width: 28px; height: 28px; font-size: 12px; border: 0; }
+.bubble { background: var(--paper); padding: 8px 12px; border-radius: 16px 16px 16px 4px; font-size: 14px; overflow-wrap: anywhere; }
+.bubble small { display: block; font-size: 11px; font-weight: 700; color: var(--muted); }
+.msg.me { align-self: flex-end; flex-direction: row-reverse; }
+.msg.me .bubble { background: var(--navy); color: var(--paper); border-radius: 16px 16px 4px 16px; }
+.msg.sys { align-self: center; max-width: 100%; }
+.msg.sys .bubble { background: transparent; color: var(--muted); font-size: 12px; text-align: center; padding: 2px; font-weight: 700; }
+.chat-form { display: flex; gap: 8px; }
+.chat-form .input { padding: 10px 12px; font-size: 15px; }
+.chat-form .btn { padding: 10px 15px; font-size: 14px; border-radius: 13px; flex: none; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Split / done */
+.meter { background: linear-gradient(160deg, var(--navy-2), var(--navy)); color: var(--paper); border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.meter .lbl { color: #C3CBDD; }
+.meter-in { display: flex; align-items: center; gap: 8px; background: #0A1326; border-radius: 13px; padding: 6px 14px; border: 1.5px solid #283863; }
+.meter-in span { font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--yellow); }
+.meter-in input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--yellow); font-family: var(--mono); font-size: 40px; font-weight: 700; padding: 2px 0; outline: none; color-scheme: dark; }
+.meter-in:focus-within { border-color: var(--yellow); }
+.done-top { background: var(--navy); color: var(--paper); padding: 20px 20px 24px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+@keyframes pop { 0% { transform: scale(.4); opacity: 0; } 70% { transform: scale(1.08); } 100% { transform: scale(1); opacity: 1; } }
+.done-badge { width: 70px; height: 70px; border-radius: 50%; background: var(--yellow); color: var(--navy); display: grid; place-items: center; animation: pop .5s cubic-bezier(.2, .8, .3, 1.2) both; box-shadow: 0 0 0 10px rgba(245, 183, 0, .15); }
+.done-badge svg { width: 34px; height: 34px; }
+.done-top .h { color: var(--paper); }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.tile { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; text-align: center; min-width: 0; }
+.tile b { font-family: var(--mono); font-size: 20px; }
+.tile span { font-size: 12px; color: var(--muted); font-weight: 700; }
+.tile.green b { color: var(--green); }
+.stars { display: flex; gap: 4px; justify-content: center; }
+.star { border: 0; background: transparent; padding: 3px; color: var(--street); }
+.star svg { width: 32px; height: 32px; }
+.star.on { color: var(--yellow); }
+
+/* Wish pool */
+.heat { display: grid; grid-template-columns: minmax(0, 1.5fr) repeat(6, minmax(0, 1fr)); gap: 3px; font-size: 11px; }
+.heat .hd { font-family: var(--mono); color: var(--muted); text-align: center; font-weight: 700; padding-bottom: 2px; }
+.heat .rl { font-weight: 700; font-size: 12px; align-self: center; line-height: 1.2; padding-right: 4px; }
+.heat .c { aspect-ratio: 1.2; border-radius: 6px; display: grid; place-items: center; font-family: var(--mono); font-size: 11px; font-weight: 700; }
+.legend { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); font-weight: 700; }
+.legend i { width: 60px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #F1EEE4, var(--yellow), #C2410C); }
+.wish { display: grid; gap: 8px; }
+.bar { height: 10px; border-radius: 5px; background: #ECE9E0; overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: 5px; background: var(--yellow); transition: width .4s; }
+.bar i.full { background: var(--green); }
+.vote { display: flex; align-items: center; gap: 10px; }
+
+/* Me */
+.prof { display: grid; grid-template-columns: 52px 1fr; gap: 12px; align-items: center; }
+.prof .av { width: 52px; height: 52px; font-size: 18px; border: 0; }
+.green { background: linear-gradient(160deg, #1D7A52, #145C3D); color: #F2FAF5; border: 0; }
+.green .lbl { color: #BFE0CC; }
+.green .big { font-family: var(--mono); font-size: 40px; font-weight: 700; line-height: 1; }
+.green .sub { color: #BFE0CC; }
+.green .bar { background: rgba(255, 255, 255, .2); }
+.green .bar i { background: #F5B700; }
+.coupon { display: grid; grid-template-columns: 44px 1fr auto; gap: 10px; align-items: center; }
+.coupon .ci { width: 44px; height: 44px; border-radius: 12px; background: var(--green-soft); color: var(--green); display: grid; place-items: center; }
+.coupon .ci svg { width: 22px; height: 22px; }
+.code { font-family: var(--mono); font-weight: 700; font-size: 13px; color: var(--green); background: var(--green-soft); padding: 4px 8px; border-radius: 8px; }
+.member { background: var(--navy); color: var(--paper); border: 0; }
+.member .lbl { color: var(--yellow); }
+.member .sub { color: #C3CBDD; }
+.member ul { display: grid; gap: 5px; font-size: 14px; }
+.member li::before { content: "＋ "; color: var(--yellow); font-weight: 700; }
+
+/* Support */
+.helphead { display: flex; gap: 12px; align-items: center; flex-direction: row; }
+.botav { width: 44px; height: 44px; border-radius: 50%; background: var(--navy); color: var(--yellow); display: grid; place-items: center; flex: none; }
+.botav svg { width: 24px; height: 24px; }
+.online { color: var(--green); font-weight: 700; font-size: 12px; display: flex; gap: 6px; align-items: center; }
+.online::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+.qchips { display: flex; flex-wrap: wrap; gap: 7px; }
+.qchip { border: 1.5px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 7px 13px; font-weight: 700; font-size: 13px; }
+.qchip:hover { border-color: var(--ink); }
+
+@keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.toast { position: absolute; left: 16px; right: 16px; bottom: 88px; background: var(--navy); color: var(--paper); padding: 12px 15px; border-radius: 15px; font-size: 14px; font-weight: 700; box-shadow: 0 14px 30px -12px rgba(0, 0, 0, .6); z-index: 7; display: flex; gap: 10px; align-items: center; animation: toastIn .25s ease both; }
+.toast::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); flex: none; }
+
+@media (max-width: 960px) {
+  .stage { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  .guide { order: 2; }
+  .phone { justify-self: center; position: relative; top: 0; }
+}
+@media (max-width: 480px) {
+  .topband { margin-bottom: 18px; }
+  .phone { width: 100%; height: 800px; border-width: 0; border-radius: 26px; box-shadow: 0 0 0 1px var(--stage-line); }
+  .notch { display: none; }
+  .langpill { top: 40px; }
+  .feats { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+
+<div class="topband" aria-hidden="true"></div>
+<div class="stage">
+  <aside class="guide" aria-label="Demo">
+    <div class="namebox" data-i18n="nameTbd">名稱待定</div>
+    <p class="tagline" id="tagline"></p>
+    <section style="display:grid;gap:10px">
+      <p class="glabel" data-i18n="flowLbl">核心流程</p>
+      <div class="flow" id="flow"></div>
+    </section>
+    <section style="display:grid;gap:10px">
+      <p class="glabel" data-i18n="featLbl">特色功能 · 點一下直接示範</p>
+      <div class="feats" id="feats"></div>
+    </section>
+    <div class="guide-row">
+      <button class="qr" id="qrBtn" type="button"><span class="qr-img"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 124 124" aria-hidden="true"><path transform="scale(4)" class="qrline" stroke="#14213d" d="M1 1.5h7m1 0h1m1 0h1m1 0h2m4 0h1m1 0h1m1 0h7m-29 1h1m5 0h1m1 0h2m4 0h1m1 0h2m1 0h2m1 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m2 0h1m1 0h3m2 0h1m3 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m2 0h2m2 0h1m1 0h3m2 0h1m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m4 0h2m3 0h2m2 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m2 0h1m1 0h1m5 0h2m1 0h1m1 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-20 1h1m1 0h4m4 0h1m-20 1h1m2 0h7m2 0h1m1 0h1m1 0h2m1 0h3m2 0h1m1 0h3m-29 1h1m1 0h4m1 0h1m2 0h1m3 0h2m1 0h3m4 0h1m1 0h2m-26 1h1m2 0h2m4 0h2m1 0h2m4 0h1m1 0h1m3 0h1m-27 1h2m1 0h2m2 0h2m5 0h1m1 0h2m3 0h5m2 0h1m-28 1h1m2 0h1m1 0h3m9 0h1m1 0h1m1 0h2m4 0h1m-29 1h2m3 0h1m1 0h1m1 0h2m1 0h2m1 0h4m2 0h8m-28 1h3m2 0h1m1 0h1m3 0h1m2 0h1m1 0h1m1 0h1m1 0h1m4 0h1m1 0h1m-29 1h1m1 0h4m3 0h1m4 0h1m1 0h1m6 0h1m2 0h1m1 0h1m-27 1h1m3 0h1m1 0h1m1 0h1m2 0h1m1 0h1m5 0h1m1 0h1m1 0h1m-26 1h1m1 0h1m1 0h2m2 0h4m3 0h1m2 0h4m2 0h1m1 0h2m-28 1h2m2 0h3m2 0h3m1 0h1m1 0h2m2 0h1m1 0h2m1 0h2m2 0h1m-29 1h4m3 0h1m2 0h4m2 0h1m1 0h4m3 0h2m-27 1h2m2 0h1m1 0h2m4 0h1m2 0h1m1 0h1m2 0h8m-20 1h1m3 0h4m2 0h1m1 0h1m3 0h2m-26 1h7m1 0h1m1 0h4m1 0h2m1 0h3m1 0h1m1 0h2m-26 1h1m5 0h1m1 0h3m3 0h1m2 0h1m1 0h2m3 0h1m-25 1h1m1 0h3m1 0h1m1 0h1m1 0h5m1 0h1m2 0h7m1 0h1m-28 1h1m1 0h3m1 0h1m1 0h3m2 0h3m2 0h1m4 0h1m4 0h1m-29 1h1m1 0h3m1 0h1m6 0h3m1 0h2m2 0h1m1 0h2m1 0h3m-29 1h1m5 0h1m2 0h1m2 0h3m6 0h1m1 0h1m1 0h2m1 0h1m-29 1h7m1 0h3m2 0h4m2 0h7"/></svg></span><span class="qr-txt"><b data-i18n="qrT">掃描開啟</b><span data-i18n="qrS">用手機掃描，馬上試用</span></span></button>
+    </div>
+    <div class="guide-row">
+      <div class="langseg" role="group" aria-label="Language"><button type="button" data-lang="zh" aria-pressed="true">中文</button><button type="button" data-lang="en" aria-pressed="false">English</button></div>
+      <button class="btn-stage" id="resetBtn" type="button" data-i18n="reset">重新開始</button>
+    </div>
+  </aside>
+
+  <div class="phone" id="phone">
+    <div class="notch" aria-hidden="true"></div>
+    <div class="statusbar" aria-hidden="true"><span>22:14</span><span class="sig"><i style="height:5px"></i><i style="height:8px"></i><i style="height:11px"></i><i style="height:14px"></i></span></div>
+    <div class="appbar">
+      <button class="iconbtn" id="backBtn" type="button" aria-label="返回"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h2 id="appTitle"></h2>
+      <span></span>
+    </div>
+    <main class="view" id="view" aria-live="polite"></main>
+    <nav class="tabbar" id="tabbar" aria-label="App"></nav>
+    <button class="fab" id="fab" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="fab">發起共乘</span></button>
+    <button class="langpill" id="langPill" type="button">EN</button>
+    <div class="toast" id="toast" role="status" hidden></div>
+  </div>
+</div>
+
+<div class="qrover" id="qrOver" role="dialog" aria-modal="true" aria-labelledby="qrOverT" hidden>
+  <div class="qrbox"><div class="qr-big"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 124 124" aria-hidden="true"><path transform="scale(4)" class="qrline" stroke="#14213d" d="M1 1.5h7m1 0h1m1 0h1m1 0h2m4 0h1m1 0h1m1 0h7m-29 1h1m5 0h1m1 0h2m4 0h1m1 0h2m1 0h2m1 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m2 0h1m1 0h3m2 0h1m3 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m2 0h2m2 0h1m1 0h3m2 0h1m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m4 0h2m3 0h2m2 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m2 0h1m1 0h1m5 0h2m1 0h1m1 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-20 1h1m1 0h4m4 0h1m-20 1h1m2 0h7m2 0h1m1 0h1m1 0h2m1 0h3m2 0h1m1 0h3m-29 1h1m1 0h4m1 0h1m2 0h1m3 0h2m1 0h3m4 0h1m1 0h2m-26 1h1m2 0h2m4 0h2m1 0h2m4 0h1m1 0h1m3 0h1m-27 1h2m1 0h2m2 0h2m5 0h1m1 0h2m3 0h5m2 0h1m-28 1h1m2 0h1m1 0h3m9 0h1m1 0h1m1 0h2m4 0h1m-29 1h2m3 0h1m1 0h1m1 0h2m1 0h2m1 0h4m2 0h8m-28 1h3m2 0h1m1 0h1m3 0h1m2 0h1m1 0h1m1 0h1m1 0h1m4 0h1m1 0h1m-29 1h1m1 0h4m3 0h1m4 0h1m1 0h1m6 0h1m2 0h1m1 0h1m-27 1h1m3 0h1m1 0h1m1 0h1m2 0h1m1 0h1m5 0h1m1 0h1m1 0h1m-26 1h1m1 0h1m1 0h2m2 0h4m3 0h1m2 0h4m2 0h1m1 0h2m-28 1h2m2 0h3m2 0h3m1 0h1m1 0h2m2 0h1m1 0h2m1 0h2m2 0h1m-29 1h4m3 0h1m2 0h4m2 0h1m1 0h4m3 0h2m-27 1h2m2 0h1m1 0h2m4 0h1m2 0h1m1 0h1m2 0h8m-20 1h1m3 0h4m2 0h1m1 0h1m3 0h2m-26 1h7m1 0h1m1 0h4m1 0h2m1 0h3m1 0h1m1 0h2m-26 1h1m5 0h1m1 0h3m3 0h1m2 0h1m1 0h2m3 0h1m-25 1h1m1 0h3m1 0h1m1 0h1m1 0h5m1 0h1m2 0h7m1 0h1m-28 1h1m1 0h3m1 0h1m1 0h3m2 0h3m2 0h1m4 0h1m4 0h1m-29 1h1m1 0h3m1 0h1m6 0h3m1 0h2m2 0h1m1 0h2m1 0h3m-29 1h1m5 0h1m2 0h1m2 0h3m6 0h1m1 0h1m1 0h2m1 0h1m-29 1h7m1 0h3m2 0h4m2 0h7"/></svg></div><p id="qrOverT" data-i18n="qrT">掃描開啟</p><code>sync-z1.github.io/nccu-taxi-share</code><button class="btn dark" id="qrClose" type="button" data-i18n="close">關閉</button></div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var LANG = 'zh';
+  function t(zh, en) { return LANG === 'en' ? en : zh; }
+  function tx(x) { return Array.isArray(x) ? t(x[0], x[1]) : x; }
+  var REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- data ---------- */
+  // km = 離政大正門的車程（示意）；x,y = 示意地圖座標
+  var PLACES = {
+    zhengmen: { zh: '政大正門', en: 'NCCU Main Gate', g: 'low', br: 'low', km: 0, x: 150, y: 150 },
+    admin: { zh: '行政大樓', en: 'Admin Building', g: 'low', br: 'low', km: 0.2, x: 172, y: 138 },
+    biz: { zh: '商學院', en: 'College of Commerce', g: 'low', br: 'low', km: 0.3, x: 192, y: 152 },
+    lib: { zh: '達賢圖書館', en: 'Dah Hsian Library', g: 'low', br: 'low', km: 0.4, x: 212, y: 136 },
+    gen: { zh: '綜合院館', en: 'General Building', g: 'low', br: 'low', km: 0.5, x: 232, y: 150 },
+    zhuangjing: { zh: '莊敬宿舍', en: 'Zhuangjing Dorms', g: 'hill', br: 'hill', km: 1.4, x: 262, y: 84 },
+    ziqiang: { zh: '自強宿舍', en: 'Ziqiang Dorms', g: 'hill', br: 'hill', km: 1.8, x: 300, y: 56 },
+    zoo: { zh: '動物園站', en: 'Taipei Zoo Station', g: 'off', br: 'zoo', km: 1.2, x: 70, y: 174, icon: 'metro' },
+    wanfang: { zh: '萬芳醫院站', en: 'Wanfang Hospital Station', g: 'off', br: 'wf', km: 2.6, x: 52, y: 92, icon: 'metro' },
+    arena: { zh: '台北小巨蛋', en: 'Taipei Arena', g: 'off', br: 'arena', km: 9, x: 112, y: 14, icon: 'music', far: true },
+    main: { zh: '台北車站', en: 'Taipei Main Station', g: 'off', br: 'main', km: 13.5, x: 18, y: 18, icon: 'train', far: true },
+    songshan: { zh: '松山機場', en: 'Songshan Airport', g: 'off', br: 'tsa', km: 11, x: 176, y: 12, icon: 'plane', far: true },
+    tpe: { zh: '桃園機場', en: 'Taoyuan Airport', g: 'off', br: 'tpe', km: 52, x: 12, y: 58, icon: 'plane', far: true }
+  };
+  var GROUPS = [['low', '山下校區', 'Lower campus'], ['hill', '山上宿舍', 'Hill dorms'], ['off', '校外', 'Off campus']];
+  var NAMES = { '郁婷': 'Yuting', '凱文': 'Kevin', '志浩': 'Zhihao', '子傑': 'Jay', '安妮': 'Annie', '佳穎': 'Jiaying', '小美': 'Mei', '依依': 'Yiyi', '品妤': 'Pinyu', '立翔': 'Lixiang', '珊珊': 'Shanshan', '承偉': 'Chengwei', '宥廷': 'Yuting L.', '你': 'You' };
+  var DAYS = { today: ['今天', 'Today'], tomorrow: ['明天', 'Tomorrow'], fri: ['週五', 'Fri'] };
+  var EVENTS = { concert: ['演唱會散場', 'After concert'], exam: ['期末考', 'Finals week'], holiday: ['連假返鄉', 'Holiday trip'], 'class': ['課表順風車', 'Class match'] };
+  var GENDER = { any: ['不限', 'Anyone'], women: ['女性限定', 'Women only'], same: ['同性別乘客', 'Same gender'] };
+  var DRIVER = { any: ['不限', 'Any driver'], women: ['女性司機優先', 'Female driver preferred'] };
+  var AVC = ['#13203C', '#765500', '#1D7A52', '#6E4A91', '#2F5D9A', '#8C2E5B'];
+  var FEE = 3;
+  var CO2_PER_KM = 0.175; // 一般燃油車每車公里約 0.175 kg CO2e（109 g/人公里 × 平均 1.6 人）
+  var PLATE = 'TDB-5821';
+
+  var ICON = {
+    home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l6-9 4 5 3-4 5 8z"/><path d="M14 8V4h4v4"/></svg>',
+    school: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-5 9 5-9 5z"/><path d="M7 12v5c3 2 7 2 10 0v-5"/></svg>',
+    metro: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M7.5 16V8l4.5 6 4.5-6v8"/></svg>',
+    train: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="14" rx="3"/><path d="M5 11h14M8 21l2-4M16 21l-2-4"/></svg>',
+    plane: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 13.5L3 11l1.5-1.5 8 .5 4.5-4.5a2 2 0 0 1 3 3L15.5 13l.5 8-1.5 1.5L12 15z"/></svg>',
+    music: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>',
+    bag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="7" width="14" height="13" rx="2"/><path d="M9 7V4h6v3M9 20v1M15 20v1"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+    shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>',
+    share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>',
+    coin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.3c-.5-.8-1.5-1.3-2.8-1.3-1.7 0-2.8.8-2.8 2s1.1 1.6 2.8 2 2.8.8 2.8 2-1.1 2-2.8 2c-1.3 0-2.3-.5-2.8-1.3M12 6.5v11"/></svg>',
+    leaf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 5-13 15-14-1 10-6 15-14 15"/><path d="M5 19l7-7"/></svg>',
+    cup: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h12v6a5 5 0 0 1-5 5h-2a5 5 0 0 1-5-5z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17M9 3v2M13 3v2"/></svg>',
+    book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg>',
+    bowl: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18a9 9 0 0 1-18 0zM8 7c0-1 1-1 1-2M12 7c0-1 1-1 1-2M16 7c0-1 1-1 1-2"/></svg>',
+    headset: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="13" width="4" height="6" rx="1.5"/><rect x="17" y="13" width="4" height="6" rx="1.5"/></svg>',
+    star: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    car: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 16V11l2-5h10l2 5v5"/><path d="M3 16h18v3H3z"/><path d="M5 11h14"/></svg>',
+    wish: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>',
+    route: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="6" r="2.5"/><path d="M8.5 18H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.5"/></svg>',
+    user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
+    mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>'
+  };
+
+  function seedRides() {
+    return [
+      { id: 'r1', stops: ['zoo', 'zhengmen'], dest: 'ziqiang', day: 'today', time: '22:40', seats: 4, riders: [{ n: '郁婷', at: 'zoo' }, { n: '凱文', at: 'zhengmen' }], event: '', luggage: 0, gender: 'any', driver: 'any', note: ['打工下班沒公車了，不想爬山。正門可以再上一位。', 'Off work late and the buses stopped. One more can board at the main gate.'] },
+      { id: 'r2', stops: ['arena'], dest: 'ziqiang', day: 'today', time: '23:10', seats: 4, riders: [{ n: '安妮', at: 'arena' }, { n: '佳穎', at: 'arena' }, { n: '小美', at: 'arena' }], event: 'concert', luggage: 0, gender: 'women', driver: 'women', note: ['演唱會散場，在 2 號出口集合。', 'Concert just ended. Meet at Exit 2.'] },
+      { id: 'r3', stops: ['ziqiang', 'zhuangjing'], dest: 'main', day: 'fri', time: '18:30', seats: 4, riders: [{ n: '志浩', at: 'ziqiang' }, { n: '子傑', at: 'zhuangjing' }], event: 'holiday', luggage: 3, gender: 'any', driver: 'any', note: ['連假返鄉，到北車轉高鐵。後車廂還能放 1 個行李箱。', 'Long weekend. Going to Taipei Main for the HSR. Room for one more suitcase.'] },
+      { id: 'r4', stops: ['ziqiang'], dest: 'gen', day: 'tomorrow', time: '07:50', seats: 4, riders: [{ n: '承偉', at: 'ziqiang' }], event: 'class', luggage: 0, gender: 'any', driver: 'any', note: ['統計學早八，一起下山。', 'Stats at 8:10. Riding down together.'] },
+      { id: 'r5', stops: ['zhuangjing'], dest: 'tpe', day: 'tomorrow', time: '05:40', seats: 3, riders: [{ n: '依依', at: 'zhuangjing' }], event: '', luggage: 2, gender: 'women', driver: 'any', note: ['早班飛機，每人一個行李箱。', 'Early flight. One suitcase each.'] },
+      { id: 'r6', stops: ['zoo'], dest: 'ziqiang', day: 'today', time: '22:10', seats: 4, riders: [{ n: '品妤', at: 'zoo' }, { n: '立翔', at: 'zoo' }, { n: '珊珊', at: 'zoo' }, { n: '宥廷', at: 'zoo' }], event: '', luggage: 0, gender: 'any', driver: 'any', note: '' }
+    ];
+  }
+  function seedWishes() {
+    return [
+      { id: 'w1', from: 'lib', to: 'ziqiang', when: ['期末考週 每晚 00:30', 'Finals week, nightly 00:30'], title: ['期末考深夜圖書館專車', 'Late-night library shuttle for finals'], votes: 18, goal: 20, mine: false },
+      { id: 'w2', from: 'ziqiang', to: 'main', when: ['每週五 17:00', 'Fridays 17:00'], title: ['週五返鄉團', 'Friday ride home'], votes: 7, goal: 12, mine: false },
+      { id: 'w3', from: 'arena', to: 'zhengmen', when: ['演唱會散場', 'After concerts'], title: ['小巨蛋演唱會回政大', 'Taipei Arena concerts back to NCCU'], votes: 11, goal: 16, mine: false }
+    ];
+  }
+  function fresh() {
+    return {
+      screen: 'signin', codeSent: false, email: '113207001@nccu.edu.tw', filter: 'all', womenOnly: false,
+      rideId: null, pick: null, joined: null, taxi: false, meter: 0, mode: 'equal', payMode: 'equal', rating: 0,
+      saved: 0, pts: 180, co2: 3.2, member: false, redeemed: {}, last: null,
+      share: true, campus: false, record: true, chat: [], help: [{ who: 'bot', text: ['你好！我是小幫手，有任何共乘問題都可以問我。', 'Hi! I am the assistant. Ask me anything about sharing a ride.'] }], agent: false,
+      draft: { stops: ['zoo'], dest: 'ziqiang', time: '22:40', seats: 4, luggage: 0, event: '', gender: 'any', driver: 'any', mode: 'equal', note: '' },
+      wishDraft: { from: 'lib', to: 'ziqiang', note: '' }, flashId: null, gDefault: 'any'
+    };
+  }
+  var S = fresh(), rides = seedRides(), wishes = seedWishes(), timers = [], lastScreen = null;
+  var view = document.getElementById('view'), phone = document.getElementById('phone'), toastEl = document.getElementById('toast'), toastTimer = null;
+
+  /* ---------- helpers ---------- */
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function money(n) { return 'NT$' + Number(n).toLocaleString('en-US'); }
+  function priceHTML(n) { return '<span class="price"><small>NT$</small>' + Number(n).toLocaleString('en-US') + '</span>'; }
+  function P(k) { return t(PLACES[k].zh, PLACES[k].en); }
+  function nm(n) { return LANG === 'en' && NAMES[n] ? NAMES[n] : n; }
+  function dayL(d) { return tx(DAYS[d] || [d, d]); }
+  function isNight(time) { var h = parseInt(time, 10); return h >= 23 || h < 6; }
+  function dist(a, b) {
+    var A = PLACES[a], B = PLACES[b];
+    var km = A.br === B.br ? Math.max(0.3, Math.abs(A.km - B.km)) : A.km + B.km;
+    return Math.round(km * 10) / 10;
+  }
+  function kmFrom(stops, dest, i) {
+    var km = 0;
+    for (var j = i; j < stops.length; j++) km += dist(stops[j], j + 1 < stops.length ? stops[j + 1] : dest);
+    return Math.round(km * 10) / 10;
+  }
+  function meter(km, night) { var st = km > 1.25 ? Math.ceil((km - 1.25) / 0.2 - 1e-9) : 0; return 85 + st * 5 + (night ? 20 : 0); }
+  function fee() { return S.member ? 0 : FEE; }
+  function destIcon(k) { var p = PLACES[k]; return ICON[p.icon || (p.g === 'hill' ? 'home' : 'school')]; }
+  function findRide(id) { for (var i = 0; i < rides.length; i++) if (rides[i].id === id) return rides[i]; return null; }
+  function hasYou(r) { return r.riders.some(function (x) { return x.n === '你'; }); }
+  function avatar(name, i) {
+    if (name === '你') return '<span class="av you">' + t('你', 'Me') + '</span>';
+    return '<span class="av" style="background:' + AVC[i % AVC.length] + '">' + esc(LANG === 'en' ? nm(name).charAt(0) : name.slice(-1)) + '</span>';
+  }
+  function toast(msg) {
+    toastEl.hidden = true; void toastEl.offsetWidth; toastEl.textContent = msg; toastEl.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { toastEl.hidden = true; }, 2600);
+  }
+  // riders as they would be if you joined at stop `at`
+  function withYou(r, at) {
+    var list = r.riders.slice();
+    if (!hasYou(r)) list.push({ n: '你', at: at || r.stops[0] });
+    return list;
+  }
+  function shares(r, list, total, mode) {
+    var km = list.map(function (x) { return Math.max(0.3, kmFrom(r.stops, r.dest, Math.max(0, r.stops.indexOf(x.at)))); });
+    var sum = km.reduce(function (a, b) { return a + b; }, 0);
+    return list.map(function (x, i) {
+      var amt = mode === 'distance' ? total * km[i] / sum : total / list.length;
+      return { n: x.n, at: x.at, km: km[i], amt: Math.ceil(amt) };
+    });
+  }
+  function rideFare(r) { return meter(kmFrom(r.stops, r.dest, 0), isNight(r.time)); }
+  function co2For(r, n) { return Math.round((n - 1) / n * kmFrom(r.stops, r.dest, 0) * CO2_PER_KM * 100) / 100; }
+  function placeOptions(sel) {
+    return GROUPS.map(function (g) {
+      return '<optgroup label="' + t(g[1], g[2]) + '">' + Object.keys(PLACES).filter(function (k) { return PLACES[k].g === g[0]; }).map(function (k) {
+        return '<option value="' + k + '"' + (k === sel ? ' selected' : '') + '>' + P(k) + '</option>';
+      }).join('') + '</optgroup>';
+    }).join('');
+  }
+  function timeOptions(sel) {
+    var out = [];
+    for (var h = 6; h <= 25; h++) for (var m = 0; m < 60; m += 10) {
+      if (h === 25 && m > 0) break;
+      var v = String(h % 24).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+      out.push('<option value="' + v + '"' + (v === sel ? ' selected' : '') + '>' + v + '</option>');
+    }
+    return out.join('');
+  }
+  function opts(map, sel) { return Object.keys(map).map(function (k) { return '<option value="' + k + '"' + (k === sel ? ' selected' : '') + '>' + tx(map[k]) + '</option>'; }).join(''); }
+  function rideTags(r) {
+    var s = '';
+    if (r.event) s += '<span class="tag">' + tx(EVENTS[r.event]) + '</span>';
+    if (r.gender !== 'any') s += '<span class="tag pink">' + tx(GENDER[r.gender]) + '</span>';
+    if (r.luggage) s += '<span class="tag grey">' + ICON.bag + r.luggage + '</span>';
+    if (r.stops.length > 1) s += '<span class="tag grey">' + t(r.stops.length + ' 個上車點', r.stops.length + ' pickups') + '</span>';
+    if (isNight(r.time)) s += '<span class="tag night">' + t('夜間', 'Night') + '</span>';
+    return s;
+  }
+
+  /* ---------- map ---------- */
+  function mapSVG(stops, dest, animate) {
+    var pts = stops.concat([dest]).map(function (k) { return PLACES[k]; });
+    var d = pts.map(function (p, i) { return (i ? 'L' : 'M') + p.x + ' ' + p.y; }).join(' ');
+    var lbl = function (p, txt, anchor) {
+      var x = Math.min(Math.max(p.x, 8), 332), y = p.y + (p.y < 30 ? 22 : -12);
+      return '<text x="' + x + '" y="' + y + '" text-anchor="' + anchor + '" font-family="Noto Sans TC, PingFang TC, sans-serif" font-size="11.5" font-weight="700" fill="#13203C" paint-order="stroke" stroke="#F1EEE4" stroke-width="4">' + esc(txt) + '</text>';
+    };
+    var anchorFor = function (p) { return p.x > 260 ? 'end' : p.x < 80 ? 'start' : 'middle'; };
+    var marks = stops.map(function (k, i) {
+      var p = PLACES[k];
+      return '<circle cx="' + p.x + '" cy="' + p.y + '" r="10" fill="#13203C" stroke="#FFFEFA" stroke-width="2.5"/><text x="' + p.x + '" y="' + (p.y + 4) + '" text-anchor="middle" font-family="Chivo Mono, monospace" font-size="11" font-weight="700" fill="#FFFEFA">' + (i + 1) + '</text>' + lbl(p, P(k), anchorFor(p));
+    }).join('');
+    var e = PLACES[dest];
+    var end = '<rect x="' + (e.x - 10) + '" y="' + (e.y - 10) + '" width="20" height="20" rx="5" fill="#F5B700" stroke="#13203C" stroke-width="3"/>' + lbl(e, P(dest) + (e.far ? ' ↗' : ''), anchorFor(e));
+    var taxi = animate && !REDUCE ? '<g><rect x="-11" y="-7" width="22" height="14" rx="4" fill="#F5B700" stroke="#13203C" stroke-width="2.5"/><animateMotion dur="6s" repeatCount="indefinite" rotate="auto" path="' + d + '"/></g>' : '';
+    return '<svg viewBox="0 0 340 200" role="img" aria-label="' + esc(t('路線：', 'Route: ') + stops.map(P).join(' → ') + ' → ' + P(dest)) + '">' +
+      '<rect width="340" height="200" fill="#F1EEE4"/>' +
+      '<path d="M200 110 C 240 60, 290 20, 340 10 L340 120 C 300 128, 250 126, 200 110 Z" fill="#DCE8D3"/>' +
+      '<path d="M228 104 C 262 70, 300 42, 340 34 M246 112 C 278 86, 310 66, 340 60" stroke="#C7DABB" stroke-width="1.5" fill="none"/>' +
+      '<text x="326" y="112" text-anchor="end" font-family="Noto Sans TC, sans-serif" font-size="10" font-weight="700" fill="#5D7A50">' + t('山上', 'Hill') + '</text>' +
+      '<path d="M-10 188 C 70 170, 140 196, 220 178 S 300 160, 350 170" stroke="#CDE0E4" stroke-width="14" fill="none"/>' +
+      '<rect x="140" y="124" width="104" height="40" rx="10" fill="#E8E2D2"/>' +
+      '<path d="M0 60 H340 M0 130 H340 M100 0 V200 M160 0 V200" stroke="#E4DDCB" stroke-width="5"/>' +
+      '<path d="' + d + '" stroke="#13203C" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<path d="' + d + '" stroke="#F5B700" stroke-width="2" fill="none" stroke-dasharray="6 7" stroke-linecap="round" stroke-linejoin="round"/>' +
+      end + marks + taxi + '</svg>';
+  }
+
+  /* ---------- screens ---------- */
+  function signin() {
+    return '<div class="si-top"><div class="si-name" aria-hidden="true"></div>' +
+      '<h2>' + t('一起搭，<em>30 幾塊</em>就上山', 'Share the cab.<br><em>NT$30-something</em> up the hill.') + '</h2>' +
+      '<p>' + t('政大學生專屬的計程車共乘媒合', 'Taxi sharing just for NCCU students') + '</p></div>' +
+      '<div class="checker"></div><div class="pad">' +
+      '<form id="signinForm" class="card" novalidate>' +
+        '<div class="field"><label for="email">' + t('學校信箱', 'School email') + '</label>' +
+        '<input class="input" id="email" type="email" autocomplete="off" spellcheck="false" value="' + esc(S.email) + '"' + (S.codeSent ? ' readonly' : '') + '>' +
+        '<p class="err" id="emailErr" hidden>' + t('需要 @nccu.edu.tw 信箱', 'Use an @nccu.edu.tw address') + '</p></div>' +
+        (S.codeSent ? '<div class="field"><div class="row"><label for="code">' + t('驗證碼', 'Code') + '</label><button type="button" class="linkbtn" data-act="democode">' + t('填入 4826', 'Fill in 4826') + '</button></div>' +
+          '<input class="input codebox" id="code" inputmode="numeric" maxlength="4" autocomplete="one-time-code" placeholder="····">' +
+          '<p class="err" id="codeErr" hidden>' + t('請輸入 4 位數字', 'Enter 4 digits') + '</p></div>' : '') +
+        '<button class="btn primary block" type="submit">' + (S.codeSent ? t('登入', 'Sign in') : t('寄驗證碼', 'Send code')) + '</button>' +
+      '</form>' +
+      '<ul class="assure">' +
+        '<li>' + ICON.shield + t('只有政大信箱認證的同學能使用', 'Only verified NCCU students can join') + '</li>' +
+        '<li>' + ICON.shield + t('乘客互評、放鳥紀錄、行程即時分享', 'Two-way ratings, no-show records, live trip sharing') + '</li>' +
+        '<li>' + ICON.shield + t('只媒合合法計程車，不做白牌車', 'Licensed taxis only, never unlicensed cars') + '</li>' +
+      '</ul></div>';
+  }
+
+  function rideCard(r) {
+    var list = withYou(r);
+    var each = Math.ceil(rideFare(r) / list.length) + fee();
+    var full = r.riders.length >= r.seats && !hasYou(r);
+    var price = full ? '<span class="word">' + t('已滿', 'Full') + '</span>' :
+      r.mine ? '<span class="word">' + t('我發起的', 'Mine') + '</span><em>' + (r.riders.length < 2 ? t('等人加入', 'Waiting') : t('可出發', 'Ready')) + '</em>' :
+      hasYou(r) ? '<span class="word">' + t('已加入', 'Joined') + '</span>' :
+      priceHTML(each) + '<em>' + t('每人', 'each') + '</em>';
+    var stack = r.riders.slice(0, 4).map(function (x, i) { return avatar(x.n, i); }).join('');
+    var from = r.stops.length > 1 ? t(P(r.stops[0]) + ' 等 ' + r.stops.length + ' 站', P(r.stops[0]) + ' +' + (r.stops.length - 1)) : P(r.stops[0]);
+    return '<button class="ride' + (r.mine ? ' mine' : '') + '" type="button" data-act="open" data-id="' + r.id + '"' + (full ? ' disabled' : '') + '>' +
+      '<span class="ico">' + destIcon(r.dest) + '</span>' +
+      '<span class="ride-main"><span class="ride-title">' + P(r.dest) + '</span>' +
+      '<span class="ride-meta">' + (r.day === 'today' ? '' : dayL(r.day) + ' ') + '<span class="num">' + r.time + '</span> · ' + t(esc(from) + ' 上車', 'from ' + esc(from)) + '</span>' +
+      '<span class="tags">' + rideTags(r) + '</span>' +
+      '<span class="ride-foot"><span class="stack">' + stack + '</span><span class="num">' + r.riders.length + '/' + r.seats + '</span></span></span>' +
+      '<span class="ride-price">' + price + '</span></button>';
+  }
+
+  function home() {
+    var F = [['all', t('全部', 'All')], ['hill', t('上山', 'Uphill')], ['low', t('到山下校區', 'To campus')], ['off', t('離校', 'Off campus')], ['event', t('活動', 'Events')]];
+    var chips = F.map(function (f) { return '<button class="chip" type="button" data-act="filter" data-f="' + f[0] + '" aria-pressed="' + (S.filter === f[0]) + '">' + f[1] + '</button>'; }).join('');
+    var list = rides.filter(function (r) {
+      var ok = S.filter === 'all' || (S.filter === 'event' ? !!r.event && r.event !== 'class' : PLACES[r.dest].g === S.filter);
+      return ok && (!S.womenOnly || r.gender === 'women');
+    });
+    var joined = S.joined ? findRide(S.joined) : null;
+    var r4 = findRide('r4');
+    return '<div class="hero"><p class="hi">' + t('晚安，113207001', 'Good evening, 113207001') + '</p><h2>' + t('要去哪？', 'Where to?') + '</h2><div class="chips">' + chips + '</div></div>' +
+      '<div class="checker"></div><div class="pad" style="padding-bottom:88px">' +
+      (joined ? '<div class="banner"><p>' + t('進行中：前往', 'In progress: to ') + P(joined.dest) + '</p><button class="btn dark sm" type="button" data-act="trip">' + t('查看', 'View') + '</button></div>' : '') +
+      '<div class="card tt' + (S.flashId === 'tt' ? ' flash' : '') + '" id="ttCard"><div class="row"><p class="lbl">' + t('課表順風車', 'Class match') + '</p><span class="tag ok">' + ICON.check + t('已同步課表', 'Timetable synced') + '</span></div>' +
+        '<div class="tt-class"><span class="tt-time">' + t('明天', 'TMR') + '<br>08:10</span><div><p class="val">' + t('統計學・綜合院館', 'Statistics · General Building') + '</p><p class="sub">' + t('3 位同堂課的同學也住自強宿舍', '3 classmates in this class also live in Ziqiang') + '</p></div></div>' +
+        (r4 ? '<div class="row"><span class="stack">' + avatar('承偉', 2) + avatar('子傑', 1) + avatar('品妤', 3) + '</span><button class="btn primary sm" type="button" data-act="open" data-id="r4">' + t('加入 07:50 共乘', 'Join the 07:50 ride') + '</button></div>' : '<p class="sub">' + t('這趟已結束', 'This ride is done') + '</p>') +
+      '</div>' +
+      '<div class="section-head"><h3>' + t('即將出發', 'Leaving soon') + '</h3><label class="filter" for="womenOnly">' + t('只看女性限定', 'Women only') + '<span class="toggle"><input type="checkbox" id="womenOnly"' + (S.womenOnly ? ' checked' : '') + '><span></span></span></label></div>' +
+      (list.length ? list.map(rideCard).join('') : '<div class="card empty">' + t('沒有符合的共乘，試試許願池', 'No rides match. Try the wish pool.') + '</div>') +
+      '</div>';
+  }
+
+  function detail() {
+    var r = findRide(S.rideId);
+    if (!r) { S.screen = 'home'; return home(); }
+    var joinedHere = hasYou(r);
+    if (!S.pick || r.stops.indexOf(S.pick) === -1) S.pick = joinedHere ? r.riders.filter(function (x) { return x.n === '你'; })[0].at : r.stops[r.stops.length - 1];
+    var list = withYou(r, S.pick);
+    var total = rideFare(r);
+    var sh = shares(r, list, total, S.mode);
+    var me = sh.filter(function (x) { return x.n === '你'; })[0];
+    var you = me.amt + fee();
+    var alone = meter(kmFrom(r.stops, r.dest, r.stops.indexOf(S.pick)), isNight(r.time));
+    var tl = r.stops.map(function (k, i) {
+      var who = list.filter(function (x) { return x.at === k; }).map(function (x) { return avatar(x.n, r.riders.indexOf(x)); }).join('');
+      var mins = Math.round(dist(r.stops[0], k) * 2.4) * (i ? 1 : 0);
+      return '<div class="tl"><i>' + (i + 1) + '</i><div><b>' + P(k) + '</b>' + (who ? '<div class="who stack">' + who + '</div>' : '') + '</div><span class="when">' + (i ? '+' + Math.max(2, mins) + t(' 分', ' min') : r.time) + '</span></div>';
+    }).join('') + '<div class="tl"><i class="end">' + ICON.check.replace('stroke-width="2.6"', 'stroke-width="3" width="12" height="12"') + '</i><div><b>' + P(r.dest) + '</b><p class="sub">' + kmFrom(r.stops, r.dest, 0) + t(' 公里', ' km') + '</p></div><span class="when">' + t('約 ', '~') + Math.max(4, Math.round(kmFrom(r.stops, r.dest, 0) * 2.2 + 2)) + t(' 分', ' min') + '</span></div>';
+    var people = r.riders.map(function (x, i) { return '<div class="rider">' + avatar(x.n, i) + '<span>' + esc(nm(x.n)) + '</span></div>'; }).join('');
+    for (var k = r.riders.length; k < r.seats; k++) people += '<div class="rider"><span class="av open">+</span><span>' + t('空位', 'Open') + '</span></div>';
+    var rows = sh.map(function (x) {
+      return '<div' + (x.n === '你' ? ' class="me"' : '') + '><dt>' + esc(nm(x.n)) + ' · ' + P(x.at) + (S.mode === 'distance' ? ' · ' + x.km + 'km' : '') + '</dt><dd>' + money(x.amt) + '</dd></div>';
+    }).join('');
+    var btn;
+    if (r.mine) btn = r.riders.length >= 2 ? '<button class="btn primary block" type="button" data-act="start">' + t('人到齊，出發', 'Everyone is here, go') + '</button>' : '<button class="btn primary block" type="button" disabled>' + t('等待同學加入', 'Waiting for riders') + '</button>';
+    else if (joinedHere) btn = '<button class="btn primary block" type="button" data-act="trip">' + t('查看行程', 'View trip') + '</button>';
+    else btn = '<button class="btn primary block" type="button" data-act="join">' + t('在' + P(S.pick) + '上車 · ' + money(you), 'Board at ' + P(S.pick) + ' · ' + money(you)) + '</button>';
+    return '<div class="pad">' +
+      '<div class="card mapcard">' + mapSVG(r.stops, r.dest, false) + '<div class="timeline">' + tl + '</div></div>' +
+      (r.stops.length > 1 && !joinedHere && !r.mine ? '<div class="card"><p class="lbl">' + t('選擇你的上車點', 'Choose your pickup') + '</p><div class="pickstop">' + r.stops.map(function (k) { return '<button type="button" data-act="pick" data-k="' + k + '" aria-pressed="' + (S.pick === k) + '">' + P(k) + '</button>'; }).join('') + '</div></div>' : '') +
+      '<div class="card"><div class="row"><p class="lbl">' + t('同行乘客 ', 'Riders ') + r.riders.length + '/' + r.seats + '</p><span class="tags">' + rideTags(r) + '</span></div>' +
+        '<div class="riders">' + people + '</div>' +
+        '<div class="facts"><div class="fact"><span>' + t('行李箱空間', 'Suitcases') + '</span><b>' + (r.luggage ? r.luggage + ' / ' + (r.seats - 1) : t('無', 'None')) + '</b></div><div class="fact"><span>' + t('乘客', 'Riders') + '</span><b>' + tx(GENDER[r.gender]) + '</b></div><div class="fact"><span>' + t('司機', 'Driver') + '</span><b>' + tx(DRIVER[r.driver]) + '</b></div></div>' +
+        (r.note ? '<p class="quote">' + esc(tx(r.note)) + '</p>' : '') +
+      '</div>' +
+      '<div class="card receipt"><div class="row"><p class="lbl">' + t('車資試算', 'Fare estimate') + '</p><div class="seg" style="width:180px"><button type="button" data-act="mode" data-m="equal" aria-pressed="' + (S.mode === 'equal') + '">' + t('均分', 'Equal') + '</button><button type="button" data-act="mode" data-m="distance" aria-pressed="' + (S.mode === 'distance') + '">' + t('按里程', 'By distance') + '</button></div></div>' +
+        '<dl><div><dt>' + t('跳錶', 'Meter') + (isNight(r.time) ? t('（含夜間 +20）', ' (incl. night +20)') : '') + '</dt><dd>' + money(total) + '</dd></div>' + rows +
+        '<div><dt>' + t('媒合費', 'Service fee') + (S.member ? t('（會員免收）', ' (members free)') : '') + '</dt><dd>' + money(fee()) + '</dd></div>' +
+        '<div class="total"><dt>' + t('你付', 'You pay') + '</dt><dd>' + money(you) + '</dd></div></dl>' +
+        (alone > you ? '<p class="save-line" style="margin-top:10px">' + ICON.coin + t('比一個人搭省 ' + money(alone - you), 'Save ' + money(alone - you) + ' vs. riding alone') + '</p>' : '') +
+      '</div></div>' +
+      '<div class="actionbar">' + btn + '</div>';
+  }
+
+  function post() {
+    var d = S.draft;
+    var stopsHTML = d.stops.map(function (k, i) {
+      return '<div class="stoprow"><i>' + (i + 1) + '</i><select class="input" id="ps' + i + '" data-stop="' + i + '" aria-label="' + t('上車點 ', 'Pickup ') + (i + 1) + '">' + placeOptions(k) + '</select>' +
+        (i > 0 ? '<button class="rm" type="button" data-act="rmstop" data-i="' + i + '" aria-label="' + t('移除', 'Remove') + '">' + ICON.x + '</button>' : '<span></span>') + '</div>';
+    }).join('');
+    var km = kmFrom(d.stops, d.dest, 0);
+    var same = d.stops.indexOf(d.dest) !== -1;
+    var fare = meter(km, isNight(d.time));
+    return '<div class="pad"><form id="postForm" class="card" novalidate>' +
+      '<div class="field"><span class="flabel">' + t('上車點（可以設多個）', 'Pickups (add more than one)') + '</span>' + stopsHTML +
+        (d.stops.length < 3 ? '<button class="addstop" type="button" data-act="addstop">' + t('＋ 新增上車點', '+ Add a pickup') + '</button>' : '') + '</div>' +
+      '<div class="stoprow"><i class="end">' + t('終', 'E') + '</i><select class="input" id="pDest" aria-label="' + t('終點', 'Destination') + '">' + placeOptions(d.dest) + '</select><span></span></div>' +
+      '<p class="err" id="postErr"' + (same ? '' : ' hidden') + '>' + t('終點不能和上車點一樣', 'The destination must differ from the pickups') + '</p>' +
+      '<div class="two"><div class="field"><label for="pTime">' + t('出發時間', 'Time') + '</label><select class="input" id="pTime">' + timeOptions(d.time) + '</select></div>' +
+        '<div class="field"><label for="pSeats">' + t('總人數', 'Seats') + '</label><select class="input" id="pSeats">' + [2, 3, 4].map(function (n) { return '<option value="' + n + '"' + (n === d.seats ? ' selected' : '') + '>' + n + t(' 人', ' people') + '</option>'; }).join('') + '</select></div></div>' +
+      '<div class="two"><div class="field"><span class="flabel">' + t('行李箱', 'Suitcases') + '</span><div class="stepper"><button type="button" data-act="lug" data-d="-1" aria-label="-">−</button><output id="pLug">' + d.luggage + '</output><button type="button" data-act="lug" data-d="1" aria-label="+">+</button></div></div>' +
+        '<div class="field"><label for="pEvent">' + t('活動標籤', 'Event tag') + '</label><select class="input" id="pEvent"><option value="">' + t('無', 'None') + '</option>' + opts(EVENTS, d.event) + '</select></div></div>' +
+      '<div class="two"><div class="field"><label for="pGender">' + t('乘客性別', 'Riders') + '</label><select class="input" id="pGender">' + opts(GENDER, d.gender) + '</select></div>' +
+        '<div class="field"><label for="pDriver">' + t('司機性別', 'Driver') + '</label><select class="input" id="pDriver">' + opts(DRIVER, d.driver) + '</select></div></div>' +
+      '<div class="field"><span class="flabel">' + t('分帳方式', 'Split') + '</span><div class="seg"><button type="button" data-act="pmode" data-m="equal" aria-pressed="' + (d.mode === 'equal') + '">' + t('均分', 'Equal') + '</button><button type="button" data-act="pmode" data-m="distance" aria-pressed="' + (d.mode === 'distance') + '">' + t('按里程比例', 'By distance') + '</button></div></div>' +
+      '<div class="field"><label for="pNote">' + t('備註', 'Note') + '</label><input class="input" id="pNote" maxlength="40" value="' + esc(d.note) + '" placeholder="' + t('例：在 2 號出口集合', 'e.g. Meet at Exit 2') + '"></div>' +
+      '<div class="est"><div><p class="sub">' + (same ? '—' : t('約 ' + km + ' 公里・跳錶約 ' + money(fare), 'About ' + km + ' km · meter ~' + money(fare))) + '</p><p class="sub">' + t('滿 ' + d.seats + ' 人時每人（含媒合費）', 'Each when full (incl. fee)') + '</p></div><span class="price">' + (same ? '—' : money(Math.ceil(fare / d.seats) + fee())) + '</span></div>' +
+      '<button class="btn primary block" type="submit"' + (same ? ' disabled' : '') + '>' + t('發佈共乘', 'Post ride') + '</button>' +
+      '</form></div>';
+  }
+
+  function trip() {
+    var r = findRide(S.joined);
+    if (!r) { S.screen = 'home'; return home(); }
+    var mine = r.riders.filter(function (x) { return x.n === '你'; })[0];
+    var chat = S.chat.map(function (m) {
+      if (m.sys) return '<div class="msg sys"><div class="bubble">' + esc(tx(m.text)) + '</div></div>';
+      if (m.who === '你') return '<div class="msg me"><div class="bubble">' + esc(tx(m.text)) + '</div></div>';
+      var i = r.riders.map(function (x) { return x.n; }).indexOf(m.who);
+      return '<div class="msg">' + avatar(m.who, i < 0 ? 0 : i) + '<div class="bubble"><small>' + esc(nm(m.who)) + '</small>' + esc(tx(m.text)) + '</div></div>';
+    }).join('');
+    return '<div class="pad">' +
+      '<ol class="progress"><li class="done">' + t('已媒合', 'Matched') + '</li><li class="' + (S.taxi ? 'done' : 'now') + '">' + t('叫車', 'Taxi') + '</li><li class="' + (S.taxi ? 'now' : '') + '">' + t('乘車', 'Ride') + '</li><li>' + t('分帳', 'Split') + '</li></ol>' +
+      '<div class="card mapcard">' + mapSVG(r.stops, r.dest, S.taxi) + '</div>' +
+      (S.taxi ? '<div class="card"><div class="taxi"><span class="plate">' + PLATE + '</span><div><p class="val">' + t('陳先生 · 合作車隊', 'Mr. Chen · partner fleet') + '</p><p class="sub">' + t('白色 Toyota Altis · 3 分鐘後到', 'White Toyota Altis · 3 min away') + '</p></div><span class="tag ok">★ 4.9</span></div></div>' :
+        '<div class="card"><p class="sub">' + t('集合：' + P(mine ? mine.at : r.stops[0]) + ' ' + r.time + '。人到齊後由發起人透過合作車隊叫車。', 'Meet at ' + P(mine ? mine.at : r.stops[0]) + ' at ' + r.time + '. The host books a licensed taxi from a partner fleet.') + '</p><button class="btn primary block" type="button" data-act="calltaxi">' + t('叫合作車隊', 'Book a partner taxi') + '</button></div>') +
+      '<div class="card safe' + (S.flashId === 'safe' ? ' flash' : '') + '" id="safeCard"><div class="safe-head">' + ICON.shield + '<div><p class="val">' + t('安心同行', 'Ride safe') + '</p>' + (S.record && S.taxi ? '<p class="rec">' + t('全程錄音中', 'Recording') + '</p>' : '<p class="sub">' + t('深夜行程會自動開啟', 'Turns on by itself late at night') + '</p>') + '</div></div>' +
+        '<label class="setting" for="tShare"><div><b>' + t('即時位置分享給室友 小美', 'Share live location with roommate Mei') + '</b><span class="sub">' + t('對方會收到一個即時追蹤連結', 'She gets a live tracking link') + '</span></div><span class="toggle"><input type="checkbox" id="tShare"' + (S.share ? ' checked' : '') + '><span></span></span></label>' +
+        '<label class="setting" for="tCampus"><div><b>' + t('同步通知校安中心', 'Notify campus security') + '</b><span class="sub">' + t('偏離路線或停留過久時自動通報', 'Auto-alert if the car leaves the route or stops too long') + '</span></div><span class="toggle"><input type="checkbox" id="tCampus"' + (S.campus ? ' checked' : '') + '><span></span></span></label>' +
+        '<label class="setting" for="tRecord"><div><b>' + t('全程錄音', 'Record the ride') + '</b><span class="sub">' + t('加密保存 7 天，只在申訴時調閱', 'Encrypted for 7 days, opened only for a complaint') + '</span></div><span class="toggle"><input type="checkbox" id="tRecord"' + (S.record ? ' checked' : '') + '><span></span></span></label>' +
+        '<div class="two"><button class="btn ghost" type="button" data-act="sharelink">' + ICON.share + t('複製行程連結', 'Copy trip link') + '</button><button class="btn danger" type="button" data-act="sos">' + t('緊急求助', 'Emergency') + '</button></div>' +
+      '</div>' +
+      '<div class="card"><p class="lbl">' + t('共乘聊天室', 'Ride chat') + '</p><div class="chat" id="chat">' + chat + '</div>' +
+        '<form class="chat-form" id="chatForm"><label for="chatInput" class="sr">' + t('訊息', 'Message') + '</label><input class="input" id="chatInput" autocomplete="off" placeholder="' + t('訊息', 'Message') + '"><button class="btn dark" type="submit">' + t('傳送', 'Send') + '</button></form></div>' +
+      '</div>' +
+      (S.taxi ? '<div class="actionbar"><button class="btn primary block" type="button" data-act="arrive">' + t('抵達，開始分帳', 'Arrived, split the fare') + '</button></div>' : '');
+  }
+
+  function split() {
+    var r = findRide(S.joined);
+    if (!r) { S.screen = 'home'; return home(); }
+    return '<div class="pad"><div class="meter"><label class="lbl" for="meterIn">' + t('輸入跳錶金額', 'Enter the meter total') + '</label><div class="meter-in"><span>NT$</span><input id="meterIn" type="number" inputmode="numeric" min="85" step="5" value="' + S.meter + '"></div></div>' +
+      '<div class="seg"><button type="button" data-act="paymode" data-m="equal" aria-pressed="' + (S.payMode === 'equal') + '">' + t('均分', 'Equal') + '</button><button type="button" data-act="paymode" data-m="distance" aria-pressed="' + (S.payMode === 'distance') + '">' + t('按里程比例', 'By distance') + '</button></div>' +
+      '<div class="card receipt"><dl id="calc"></dl></div>' +
+      '<p class="sub">' + t('付款方式：LINE Pay、街口支付，轉給叫車的人。', 'Pay the host with LINE Pay or JKOPAY.') + '</p></div>' +
+      '<div class="actionbar"><button class="btn primary block" type="button" data-act="pay" id="payBtn">' + t('付款', 'Pay') + '</button></div>';
+  }
+  function updateCalc() {
+    var r = findRide(S.joined), input = document.getElementById('meterIn');
+    if (!r || !input) return;
+    var v = Number(input.value), btn = document.getElementById('payBtn'), calc = document.getElementById('calc');
+    if (!isFinite(v) || v < 85) { calc.innerHTML = '<div><dt class="err">' + t('金額至少 NT$85', 'Minimum NT$85') + '</dt></div>'; btn.disabled = true; return; }
+    S.meter = v;
+    var sh = shares(r, r.riders, v, S.payMode);
+    var me = sh.filter(function (x) { return x.n === '你'; })[0];
+    calc.innerHTML = sh.map(function (x) { return '<div' + (x.n === '你' ? ' class="me"' : '') + '><dt>' + esc(nm(x.n)) + (S.payMode === 'distance' ? ' · ' + x.km + 'km' : '') + '</dt><dd>' + money(x.amt) + '</dd></div>'; }).join('') +
+      '<div><dt>' + t('媒合費', 'Service fee') + '</dt><dd>' + money(fee()) + '</dd></div><div class="total"><dt>' + t('你付', 'You pay') + '</dt><dd>' + money(me.amt + fee()) + '</dd></div>';
+    btn.disabled = false;
+    btn.textContent = t('付給' + nm(S.payer) + ' ', 'Pay ' + nm(S.payer) + ' ') + money(me.amt + fee());
+  }
+
+  function done() {
+    var L = S.last || { saved: 0, co2: 0, pts: 0 };
+    var stars = '';
+    for (var i = 1; i <= 5; i++) stars += '<button class="star' + (i <= S.rating ? ' on' : '') + '" type="button" data-act="rate" data-v="' + i + '" aria-label="' + i + t(' 顆星', ' stars') + '">' + ICON.star + '</button>';
+    return '<div class="done-top"><div class="done-badge">' + ICON.check + '</div><h2 class="h">' + t('付款完成', 'Paid') + '</h2><p class="sub" style="color:#C3CBDD">' + t('謝謝你一起共乘', 'Thanks for sharing the ride') + '</p></div>' +
+      '<div class="checker"></div><div class="pad">' +
+      '<div class="tiles"><div class="tile"><b>' + money(L.saved) + '</b><span>' + t('這趟省下', 'Saved') + '</span></div><div class="tile green"><b>' + L.co2 + '</b><span>' + t('kg 減碳', 'kg CO₂ cut') + '</span></div><div class="tile green"><b>+' + L.pts + '</b><span>' + t('綠色點數', 'Green points') + '</span></div></div>' +
+      '<div class="card" style="align-items:center;text-align:center"><p class="lbl">' + t('幫這趟評分', 'Rate this ride') + '</p><div class="stars">' + stars + '</div><p class="sub">' + t('互評會影響彼此的信用分數', 'Ratings shape everyone’s trust score') + '</p></div>' +
+      '<button class="btn dark block" type="button" data-act="tab" data-tab="me">' + ICON.leaf + t('用點數兌換優惠', 'Redeem points') + '</button>' +
+      '<button class="btn primary block" type="button" data-act="home">' + t('完成', 'Done') + '</button></div>';
+  }
+
+  var HEAT = {
+    cols: ['07', '08', '12', '17', '22', '00'],
+    rows: [[['山下 → 山上', 'Up the hill']], [['山上 → 山下', 'Down the hill']], [['動物園站 ↔ 政大', 'Zoo Stn ↔ NCCU']], [['政大 → 北車', 'NCCU → Taipei Main']]],
+    v: [[2, 4, 3, 6, 9, 10], [9, 10, 4, 3, 1, 0], [6, 7, 3, 8, 7, 4], [0, 1, 1, 7, 2, 0]]
+  };
+  function heatColor(v) {
+    if (v === 0) return '#F1EEE4';
+    var a = v / 10;
+    return v >= 8 ? 'rgba(194,65,12,' + (0.55 + a * 0.4) + ')' : 'rgba(245,183,0,' + (0.2 + a * 0.75) + ')';
+  }
+  function wish() {
+    var grid = '<span></span>' + HEAT.cols.map(function (c) { return '<span class="hd">' + c + '</span>'; }).join('') +
+      HEAT.rows.map(function (r, i) {
+        return '<span class="rl">' + tx(r[0]) + '</span>' + HEAT.v[i].map(function (v) { return '<span class="c" style="background:' + heatColor(v) + ';color:' + (v >= 8 ? '#FFFEFA' : '#13203C') + '" title="' + v + '">' + (v ? v * 10 : '') + '</span>'; }).join('');
+      }).join('');
+    var list = wishes.map(function (w) {
+      var full = w.votes >= w.goal;
+      return '<div class="card wish' + (S.flashId === w.id ? ' flash' : '') + '"><div class="row" style="align-items:flex-start"><div><p class="val">' + esc(tx(w.title)) + '</p><p class="sub">' + P(w.from) + ' → ' + P(w.to) + ' · ' + esc(tx(w.when)) + '</p></div>' + (full ? '<span class="tag ok">' + t('已成團', 'Launched') + '</span>' : '') + '</div>' +
+        '<div class="bar"><i class="' + (full ? 'full' : '') + '" style="width:' + Math.min(100, w.votes / w.goal * 100) + '%"></i></div>' +
+        '<div class="vote"><span class="sub num" style="flex:1">' + w.votes + ' / ' + w.goal + t(' 人', ' people') + (full ? '' : t('，還差 ' + (w.goal - w.votes) + ' 人開團', ' · ' + (w.goal - w.votes) + ' more to launch')) + '</span>' +
+        (full ? '<button class="btn dark sm" type="button" data-act="filter" data-f="all">' + t('看共乘', 'See rides') + '</button>' : '<button class="btn ' + (w.mine ? 'ghost' : 'primary') + ' sm" type="button" data-act="vote" data-id="' + w.id + '"' + (w.mine ? ' disabled' : '') + '>' + (w.mine ? t('已 +1', 'Voted') : t('我也要 +1', 'Me too +1')) + '</button>') + '</div></div>';
+    }).join('');
+    var wd = S.wishDraft;
+    return '<div class="pad">' +
+      '<div class="card"><div class="row"><p class="lbl">' + t('熱門路線熱力圖・本週需求', 'Route heat map · this week') + '</p><span class="legend">' + t('少', 'Low') + '<i></i>' + t('多', 'High') + '</span></div>' +
+        '<div class="heat">' + grid + '</div><p class="sub">' + t('數字是本週發起或許願的人次。22:00 後上山、早八下山最熱門。', 'Numbers are requests this week. Uphill after 22:00 and downhill before 8 a.m. are the busiest.') + '</p></div>' +
+      '<p class="lbl">' + t('揪團許願池・人數達標自動開團並推播', 'Wish pool · launches and notifies when the goal is reached') + '</p>' + list +
+      '<form class="card" id="wishForm" novalidate><p class="val">' + t('許一條新路線', 'Wish for a new route') + '</p>' +
+        '<div class="two"><div class="field"><label for="wFrom">' + t('起點', 'From') + '</label><select class="input" id="wFrom">' + placeOptions(wd.from) + '</select></div><div class="field"><label for="wTo">' + t('終點', 'To') + '</label><select class="input" id="wTo">' + placeOptions(wd.to) + '</select></div></div>' +
+        '<div class="field"><label for="wNote">' + t('名稱', 'Name') + '</label><input class="input" id="wNote" maxlength="24" value="' + esc(wd.note) + '" placeholder="' + t('例：週三社課後回宿舍', 'e.g. Back to dorms after Wed club') + '"></div>' +
+        '<button class="btn dark block" type="submit">' + t('發起許願', 'Make a wish') + '</button></form>' +
+      '</div>';
+  }
+
+  var COUPONS = [
+    { id: 'c1', icon: 'bowl', name: ['學餐折 NT$20', 'NT$20 off at the cafeteria'], shop: ['自強十舍學餐', 'Dorm cafeteria'], cost: 200 },
+    { id: 'c2', icon: 'cup', name: ['咖啡折 NT$15', 'NT$15 off coffee'], shop: ['校門口咖啡廳', 'Café by the gate'], cost: 150 },
+    { id: 'c3', icon: 'book', name: ['書局 9 折', '10% off books'], shop: ['校園書局', 'Campus bookstore'], cost: 300 }
+  ];
+  function me() {
+    var next = COUPONS.filter(function (c) { return !S.redeemed[c.id] && c.cost > S.pts; }).sort(function (a, b) { return a.cost - b.cost; })[0];
+    var cps = COUPONS.map(function (c) {
+      var got = S.redeemed[c.id];
+      return '<div class="coupon"><span class="ci">' + ICON[c.icon] + '</span><div><p class="val" style="font-size:15px">' + tx(c.name) + '</p><p class="sub">' + tx(c.shop) + ' · ' + c.cost + t(' 點', ' pts') + '</p></div>' +
+        (got ? '<span class="code">' + got + '</span>' : '<button class="btn ' + (S.pts >= c.cost ? 'primary' : 'ghost') + ' sm" type="button" data-act="redeem" data-id="' + c.id + '"' + (S.pts >= c.cost ? '' : ' disabled') + '>' + t('兌換', 'Redeem') + '</button>') + '</div>';
+    }).join('<div class="divider"></div>');
+    return '<div class="pad">' +
+      '<div class="card"><div class="prof">' + avatar('你', 0) + '<div><p class="val">113207001</p><p class="sub">' + esc(S.email) + '</p></div></div>' +
+        '<div class="facts"><div class="fact"><span>' + t('互評', 'Rating') + '</span><b>★ 4.9</b></div><div class="fact"><span>' + t('信用分數', 'Trust') + '</span><b class="num">100</b></div><div class="fact"><span>' + t('放鳥', 'No-shows') + '</span><b class="num">0</b></div></div></div>' +
+      '<div class="card green' + (S.flashId === 'green' ? ' flash' : '') + '" id="greenCard"><div class="row"><p class="lbl">' + t('綠色點數', 'Green points') + '</p>' + ICON.leaf.replace('<svg', '<svg width="22" height="22"') + '</div>' +
+        '<p class="big">' + S.pts + '</p><p class="sub">' + t('累計減碳 ' + S.co2.toFixed(1) + ' kg CO₂e・每減 10 g 得 1 點', S.co2.toFixed(1) + ' kg CO₂e cut so far · 1 point per 10 g') + '</p>' +
+        (next ? '<div class="bar"><i style="width:' + Math.min(100, S.pts / next.cost * 100) + '%"></i></div><p class="sub">' + t('再 ' + (next.cost - S.pts) + ' 點可換「' + tx(next.name) + '」', (next.cost - S.pts) + ' more for “' + tx(next.name) + '”') + '</p>' : '') + '</div>' +
+      '<div class="card"><p class="lbl">' + t('特約商家優惠', 'Partner shop deals') + '</p>' + cps + '</div>' +
+      '<div class="card member' + (S.flashId === 'member' ? ' flash' : '') + '" id="memberCard"><div class="row"><p class="lbl">' + t('共乘會員', 'Ride Pass') + '</p><span class="price" style="color:#F5B700">NT$49<small style="color:#C3CBDD">' + t('/月', '/mo') + '</small></span></div>' +
+        '<ul><li>' + t('免收每趟 NT$3 媒合費', 'No NT$3 service fee per ride') + '</li><li>' + t('熱門時段優先媒合', 'Priority matching at peak times') + '</li><li>' + t('綠色點數 1.5 倍', '1.5× green points') + '</li></ul>' +
+        '<p class="sub">' + t('每月搭 17 趟以上就划算', 'Pays off from 17 rides a month') + '</p>' +
+        '<button class="btn ' + (S.member ? 'ghost' : 'primary') + ' block" type="button" data-act="member">' + (S.member ? t('已是會員 · 取消', 'Member · Cancel') : t('加入會員（Demo）', 'Join (demo)')) + '</button></div>' +
+      '<div class="card"><p class="lbl">' + t('安全設定', 'Safety settings') + '</p>' +
+        '<div class="setting"><div><b>' + t('緊急聯絡人', 'Emergency contact') + '</b><span class="sub">' + t('室友 小美・校安中心', 'Roommate Mei · Campus security') + '</span></div></div><div class="divider"></div>' +
+        '<div class="setting"><div><b>' + t('預設乘客性別', 'Default rider preference') + '</b></div><select class="input" id="gDefault" style="width:150px">' + opts(GENDER, S.gDefault) + '</select></div></div>' +
+      '<button class="btn ghost block" type="button" data-act="tab" data-tab="help">' + ICON.headset + t('聯絡線上客服', 'Contact support') + '</button>' +
+      '</div>';
+  }
+
+  var FAQ = [
+    { q: ['怎麼分帳？', 'How is the fare split?'], k: /分帳|車資|付|錢|split|fare|pay/i, a: ['抵達後輸入跳錶金額，可以選均分或按里程比例，再用 LINE Pay 或街口轉給叫車的人。每人加 3 元媒合費，會員免收。', 'Enter the meter total, choose equal or by-distance, then pay the host with LINE Pay or JKOPAY. Each rider adds NT$3; members pay nothing extra.'] },
+    { q: ['有人放鳥怎麼辦？', 'What if someone no-shows?'], k: /放鳥|沒來|no.?show/i, a: ['放鳥會扣信用分數，累積 3 次暫停使用 7 天。車資由到場的人分攤。', 'No-shows lose trust points; 3 strikes means a 7-day pause. The fare is split among those who came.'] },
+    { q: ['錄音會被聽嗎？', 'Who hears the recording?'], k: /錄音|隱私|record|privacy/i, a: ['錄音加密保存 7 天，只有在你或同行者申訴時，才會由客服調閱。', 'Recordings are encrypted for 7 days and opened by support only if someone files a complaint.'] },
+    { q: ['綠色點數怎麼用？', 'How do green points work?'], k: /點數|綠色|碳|point|green|carbon/i, a: ['每次共乘依少開的車程估算減碳量，每 10 g 得 1 點，可在「我的」兌換特約商家優惠。', 'Each shared ride estimates the CO₂ saved. You earn 1 point per 10 g and redeem them under Me.'] },
+    { q: ['是白牌車嗎？', 'Is this an unlicensed taxi?'], k: /白牌|合法|legal|license/i, a: ['不是。我們只媒合同學一起搭合法計程車，司機來自合作車隊。', 'No. We only match students to share licensed taxis from partner fleets.'] },
+    { q: ['轉接真人客服', 'Talk to a person'], k: /真人|客服|人工|person|human|agent/i, human: true }
+  ];
+  function helpReply(text, hit) {
+    if (!hit) for (var i = 0; i < FAQ.length; i++) if (FAQ[i].k.test(text)) { hit = FAQ[i]; break; }
+    var push = function (m) { S.help.push(m); if (S.screen === 'support') render(); };
+    if (hit && hit.human) {
+      timers.push(setTimeout(function () { push({ who: 'bot', text: ['好的，正在幫你轉接…', 'Sure, connecting you to a person…'] }); }, 500));
+      timers.push(setTimeout(function () { S.agent = true; push({ who: 'agent', text: ['你好，我是客服小林，請問有什麼可以幫你？', 'Hi, this is Lin from support. How can I help?'] }); }, 1800));
+      return;
+    }
+    var ans = hit ? hit.a : S.agent ? ['收到，我幫你查一下，請稍等。', 'Got it. Let me check for you.'] : ['我還在學習中。可以點下面的常見問題，或轉接真人客服。', 'I am still learning. Tap a question below, or talk to a person.'];
+    timers.push(setTimeout(function () { push({ who: S.agent ? 'agent' : 'bot', text: ans }); }, 600));
+  }
+  function support() {
+    var msgs = S.help.map(function (m) {
+      if (m.who === 'me') return '<div class="msg me"><div class="bubble">' + esc(tx(m.text)) + '</div></div>';
+      var who = m.who === 'agent' ? t('客服 小林', 'Lin · Support') : t('小幫手', 'Assistant');
+      var av = m.who === 'agent' ? '<span class="av" style="background:#1D7A52">' + t('林', 'L') + '</span>' : '<span class="av bot">' + ICON.headset + '</span>';
+      return '<div class="msg">' + av + '<div class="bubble"><small>' + who + '</small>' + esc(tx(m.text)) + '</div></div>';
+    }).join('');
+    return '<div class="pad">' +
+      '<div class="card helphead"><span class="botav">' + ICON.headset + '</span><div><p class="val">' + t('線上客服', 'Online support') + '</p><p class="online">' + t('每天 08:00–02:00 在線', 'Online daily 08:00–02:00') + '</p></div></div>' +
+      '<div class="card"><div class="chat tall" id="helpChat">' + msgs + '</div></div>' +
+      '<p class="lbl">' + t('常見問題', 'Common questions') + '</p><div class="qchips">' + FAQ.map(function (f, i) { return '<button class="qchip" type="button" data-act="faq" data-i="' + i + '">' + tx(f.q) + '</button>'; }).join('') + '</div></div>' +
+      '<div class="actionbar"><form class="chat-form" id="helpForm"><label for="helpInput" class="sr">' + t('訊息', 'Message') + '</label><input class="input" id="helpInput" autocomplete="off" placeholder="' + t('輸入問題', 'Type a question') + '"><button class="btn dark" type="submit">' + t('傳送', 'Send') + '</button></form></div>';
+  }
+
+  /* ---------- render ---------- */
+  var SCREENS = { signin: signin, home: home, detail: detail, post: post, trip: trip, split: split, done: done, wish: wish, me: me, support: support };
+  var TABS = [['rides', 'car', '共乘', 'Rides'], ['wish', 'wish', '許願池', 'Wishes'], ['trip', 'route', '行程', 'Trip'], ['help', 'headset', '客服', 'Help'], ['me', 'user', '我的', 'Me']];
+  var FLOW = [['signin', '登入', 'Sign in'], ['home', '找共乘', 'Find'], ['post', '發起', 'Post'], ['trip', '乘車', 'Ride'], ['split', '分帳', 'Split']];
+  var FEATS = [
+    ['tt', '課表順風車', 'Class match', '同堂課同路線自動推薦', 'Suggests classmates on your route'],
+    ['multi', '多個上車點', 'Multiple pickups', '按里程比例分帳', 'Split by distance'],
+    ['safe', '安心同行', 'Ride safe', '即時位置、校安、錄音', 'Live location, security, recording'],
+    ['event', '行李與活動標籤', 'Luggage & events', '演唱會、返鄉、機場', 'Concerts, holidays, airport'],
+    ['wish', '許願池與熱力圖', 'Wish pool & heat map', '人數達標自動開團', 'Launches when enough people join'],
+    ['green', '碳足跡綠色點數', 'Green points', '減碳換商家優惠', 'Cut CO₂, earn shop deals'],
+    ['member', '會員方案', 'Ride Pass', 'NT$49 免媒合費', 'NT$49, no fees'],
+    ['help', '線上客服', 'Support chat', '常見問題與真人', 'FAQ and a real person']
+  ];
+  function title(sc) { return { detail: t('共乘詳情', 'Ride'), post: t('發起共乘', 'New ride'), trip: t('我的行程', 'My trip'), split: t('分帳', 'Split'), wish: t('揪團許願池', 'Wish pool'), me: t('我的', 'Me'), support: t('線上客服', 'Support') }[sc] || ''; }
+  function render() {
+    var changed = S.screen !== lastScreen;
+    view.innerHTML = SCREENS[S.screen]();
+    view.classList.remove('enter');
+    if (changed) { void view.offsetWidth; view.classList.add('enter'); }
+    var dark = S.screen === 'signin' || S.screen === 'home' || S.screen === 'done';
+    phone.classList.toggle('darktop', dark);
+    phone.classList.toggle('signin', S.screen === 'signin');
+    document.getElementById('appTitle').textContent = title(S.screen);
+    document.getElementById('fab').hidden = S.screen !== 'home';
+    var tab = { trip: 'trip', split: 'trip', wish: 'wish', me: 'me', support: 'help' }[S.screen] || 'rides';
+    document.getElementById('tabbar').innerHTML = TABS.map(function (x) { return '<button class="tab" type="button" data-tab="' + x[0] + '"' + (x[0] === tab ? ' aria-current="page"' : '') + '>' + ICON[x[1]] + '<span>' + t(x[2], x[3]) + '</span></button>'; }).join('');
+    var cur = { signin: 0, home: 1, detail: 1, post: 2, trip: 3, split: 4, done: 4 }[S.screen];
+    document.getElementById('flow').innerHTML = FLOW.map(function (f, i) { return '<button type="button" data-flow="' + f[0] + '"' + (i === cur ? ' aria-current="step"' : '') + ' class="' + (cur !== undefined && i < cur ? 'past' : '') + '"><span>0' + (i + 1) + '</span>' + t(f[1], f[2]) + '</button>'; }).join('');
+    if (changed) { view.scrollTop = 0; lastScreen = S.screen; }
+    if (S.screen === 'split') updateCalc();
+    var chat = document.getElementById('chat') || document.getElementById('helpChat');
+    if (chat) chat.scrollTop = chat.scrollHeight;
+    if (S.screen === 'support' && !changed) view.scrollTop = view.scrollHeight;
+    if (S.flashId) {
+      var el = document.getElementById({ tt: 'ttCard', safe: 'safeCard', green: 'greenCard', member: 'memberCard' }[S.flashId] || 'x');
+      if (el) el.scrollIntoView({ block: 'center', behavior: REDUCE ? 'auto' : 'smooth' });
+      S.flashId = null;
+    }
+  }
+  function go(sc) { S.screen = sc; render(); }
+
+  /* ---------- actions ---------- */
+  function joinRide(r, at) {
+    if (S.joined && S.joined !== r.id) { toast(t('先完成目前的行程', 'Finish your current trip first')); return false; }
+    if (r.riders.length >= r.seats) { toast(t('這趟已滿', 'This ride is full')); return false; }
+    r.riders.push({ n: '你', at: at });
+    S.joined = r.id; S.taxi = false; S.mode = S.mode || 'equal';
+    var o = r.riders.filter(function (x) { return x.n !== '你'; });
+    S.chat = [{ sys: true, text: ['你已加入，車資會依人數自動更新', 'You joined. The fare updates with the number of riders.'] }];
+    if (o[0]) S.chat.push({ who: o[0].n, text: ['我在' + PLACES[o[0].at].zh + '了', 'I am at ' + PLACES[o[0].at].en] });
+    if (o[1]) S.chat.push({ who: o[1].n, text: ['晚兩分鐘到', 'Running 2 min late'] });
+    S.share = true; S.record = true; S.campus = isNight(r.time);
+    return true;
+  }
+  function getR1() {
+    var r = findRide('r1');
+    if (!r) { r = seedRides()[0]; rides.unshift(r); }
+    return r;
+  }
+  function ensureTrip() {
+    if (S.joined) return findRide(S.joined);
+    var r = getR1();
+    if (hasYou(r)) { S.joined = r.id; return r; }
+    joinRide(r, 'zhengmen');
+    return r;
+  }
+  function signedIn() { if (S.screen === 'signin') S.screen = 'home'; }
+  function demo(id) {
+    signedIn();
+    if (id === 'tt') { S.flashId = 'tt'; S.filter = 'all'; go('home'); }
+    else if (id === 'multi') { var r1 = S.joined ? findRide(S.joined) : getR1(); S.rideId = r1.id; S.pick = 'zhengmen'; S.mode = 'distance'; go('detail'); }
+    else if (id === 'safe') { if (ensureTrip()) { S.taxi = true; S.flashId = 'safe'; go('trip'); } }
+    else if (id === 'event') { S.filter = 'event'; go('home'); }
+    else if (id === 'wish') go('wish');
+    else if (id === 'green') { S.flashId = 'green'; go('me'); }
+    else if (id === 'member') { S.flashId = 'member'; go('me'); }
+    else if (id === 'help') go('support');
+  }
+
+  view.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-act]');
+    if (!b || b.disabled) return;
+    var a = b.dataset.act;
+    if (a === 'democode') { document.getElementById('code').value = '4826'; return; }
+    if (a === 'filter') { S.filter = b.dataset.f; go('home'); return; }
+    if (a === 'open') { S.rideId = b.dataset.id; S.pick = null; go('detail'); return; }
+    if (a === 'pick') { S.pick = b.dataset.k; render(); return; }
+    if (a === 'mode') { S.mode = b.dataset.m; render(); return; }
+    if (a === 'trip') { go('trip'); return; }
+    if (a === 'home') { go('home'); return; }
+    if (a === 'tab') { tabGo(b.dataset.tab); return; }
+    if (a === 'join') {
+      var r = findRide(S.rideId);
+      if (r && joinRide(r, S.pick)) { toast(t('已加入', 'Joined')); go('trip'); }
+      return;
+    }
+    if (a === 'start') {
+      var mr = findRide(S.rideId);
+      S.joined = mr.id; S.taxi = false;
+      S.chat = [{ sys: true, text: ['人到齊了，可以叫車', 'Everyone is here. Book the taxi.'] }, { who: mr.riders[1].n, text: ['我到了', 'I am here'] }];
+      go('trip'); return;
+    }
+    if (a === 'calltaxi') { S.taxi = true; S.chat.push({ sys: true, text: ['已透過合作車隊叫車 ' + PLATE, 'Partner taxi booked ' + PLATE] }); toast(t('已叫車', 'Taxi booked')); render(); return; }
+    if (a === 'sharelink') {
+      var tr = findRide(S.joined);
+      var text = t('我正在共乘：' + tr.time + ' ' + P(tr.stops[0]) + ' → ' + P(tr.dest) + '，車牌 ' + PLATE + '。即時位置：', 'I am sharing a ride: ' + tr.time + ' ' + P(tr.stops[0]) + ' → ' + P(tr.dest) + ', plate ' + PLATE + '. Live location: ') + 'share.example/trip/8F2K';
+      var ok = function () { toast(t('已複製行程連結', 'Trip link copied')); }, fail = function () { toast(text); };
+      try { navigator.clipboard.writeText(text).then(ok, fail); } catch (err) { fail(); }
+      return;
+    }
+    if (a === 'sos') { toast(t('Demo：已通知校安中心與室友 小美，並傳送即時位置', 'Demo: campus security and Mei were alerted with your live location')); return; }
+    if (a === 'arrive') {
+      var ar = findRide(S.joined);
+      S.meter = rideFare(ar) + 5; S.payMode = 'equal';
+      S.payer = ar.riders.filter(function (x) { return x.n !== '你'; })[0];
+      S.payer = S.payer ? S.payer.n : '同行者';
+      go('split'); return;
+    }
+    if (a === 'paymode') { S.payMode = b.dataset.m; render(); return; }
+    if (a === 'pay') {
+      var pr = findRide(S.joined);
+      var sh = shares(pr, pr.riders, S.meter, S.payMode);
+      var mine = sh.filter(function (x) { return x.n === '你'; })[0];
+      var alone = meter(kmFrom(pr.stops, pr.dest, pr.stops.indexOf(mine.at)), isNight(pr.time));
+      var co2 = co2For(pr, pr.riders.length);
+      var pts = Math.round(co2 * 100 * (S.member ? 1.5 : 1));
+      S.last = { saved: Math.max(0, alone - mine.amt - fee()), co2: co2, pts: pts };
+      S.saved += S.last.saved; S.co2 += co2; S.pts += pts;
+      rides = rides.filter(function (x) { return x.id !== pr.id; });
+      S.joined = null; S.rating = 0;
+      go('done'); return;
+    }
+    if (a === 'rate') { S.rating = Number(b.dataset.v); render(); return; }
+    if (a === 'addstop') { S.draft.stops.push(['zhengmen', 'gen', 'lib'].filter(function (k) { return S.draft.stops.indexOf(k) === -1; })[0]); render(); return; }
+    if (a === 'rmstop') { S.draft.stops.splice(Number(b.dataset.i), 1); render(); return; }
+    if (a === 'lug') { S.draft.luggage = Math.min(4, Math.max(0, S.draft.luggage + Number(b.dataset.d))); render(); return; }
+    if (a === 'pmode') { S.draft.mode = b.dataset.m; render(); return; }
+    if (a === 'vote') {
+      var w = wishes.filter(function (x) { return x.id === b.dataset.id; })[0];
+      w.votes++; w.mine = true;
+      if (w.votes >= w.goal) {
+        toast(t('人數達標！已自動開團並推播給 ' + w.votes + ' 人', 'Goal reached! Ride launched and ' + w.votes + ' people notified'));
+        rides.unshift({ id: 'w' + Date.now(), stops: [w.from], dest: w.to, day: 'today', time: '00:30', seats: 4, riders: [{ n: '珊珊', at: w.from }, { n: '立翔', at: w.from }], event: 'exam', luggage: 0, gender: 'any', driver: 'any', note: [tx(w.title), tx(w.title)] });
+      } else toast(t('已 +1', 'Voted'));
+      render(); return;
+    }
+    if (a === 'redeem') {
+      var c = COUPONS.filter(function (x) { return x.id === b.dataset.id; })[0];
+      if (S.pts < c.cost) return;
+      S.pts -= c.cost; S.redeemed[c.id] = 'GO-' + (1000 + Math.floor(Math.random() * 9000));
+      toast(t('兌換成功，結帳時出示代碼', 'Redeemed. Show the code at checkout')); render(); return;
+    }
+    if (a === 'member') { S.member = !S.member; toast(S.member ? t('已加入會員：免媒合費', 'Ride Pass on: no service fee') : t('已取消會員', 'Ride Pass cancelled')); render(); return; }
+    if (a === 'faq') { var f = FAQ[Number(b.dataset.i)]; S.help.push({ who: 'me', text: f.q }); render(); helpReply('', f); return; }
+  });
+
+  view.addEventListener('change', function (e) {
+    var el = e.target, d = S.draft;
+    if (el.id === 'womenOnly') { S.womenOnly = el.checked; render(); return; }
+    if (el.dataset.stop !== undefined) { d.stops[Number(el.dataset.stop)] = el.value; render(); return; }
+    var map = { pDest: 'dest', pTime: 'time', pEvent: 'event', pGender: 'gender', pDriver: 'driver' };
+    if (map[el.id]) { d[map[el.id]] = el.value; render(); return; }
+    if (el.id === 'pSeats') { d.seats = Number(el.value); render(); return; }
+    if (el.id === 'tShare') { S.share = el.checked; toast(el.checked ? t('已分享即時位置給小美', 'Sharing live location with Mei') : t('已停止分享', 'Stopped sharing')); return; }
+    if (el.id === 'tCampus') { S.campus = el.checked; toast(el.checked ? t('校安中心會同步看到這趟行程', 'Campus security can now see this trip') : t('已關閉校安通知', 'Campus alert off')); return; }
+    if (el.id === 'tRecord') { S.record = el.checked; render(); return; }
+    if (el.id === 'wFrom') S.wishDraft.from = el.value;
+    if (el.id === 'wTo') S.wishDraft.to = el.value;
+    if (el.id === 'gDefault') { S.gDefault = el.value; S.draft.gender = el.value; toast(t('已更新預設', 'Default updated')); }
+  });
+  view.addEventListener('input', function (e) {
+    if (e.target.id === 'meterIn') updateCalc();
+    if (e.target.id === 'pNote') S.draft.note = e.target.value;
+    if (e.target.id === 'wNote') S.wishDraft.note = e.target.value;
+  });
+  view.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var f = e.target;
+    if (f.id === 'signinForm') {
+      if (!S.codeSent) {
+        var email = document.getElementById('email').value.trim().toLowerCase();
+        var ok = /^[^\s@]+@nccu\.edu\.tw$/.test(email);
+        document.getElementById('emailErr').hidden = ok;
+        if (!ok) return;
+        S.email = email; S.codeSent = true; render(); return;
+      }
+      var okc = /^\d{4}$/.test(document.getElementById('code').value.trim());
+      document.getElementById('codeErr').hidden = okc;
+      if (okc) go('home');
+      return;
+    }
+    if (f.id === 'postForm') {
+      var d = S.draft;
+      if (d.stops.indexOf(d.dest) !== -1) return;
+      var id = 'm' + Date.now();
+      rides.unshift({ id: id, mine: true, stops: d.stops.slice(), dest: d.dest, day: 'today', time: d.time, seats: d.seats, riders: [{ n: '你', at: d.stops[0] }], event: d.event, luggage: d.luggage, gender: d.gender, driver: d.driver, note: d.note });
+      S.mode = d.mode; S.filter = 'all'; S.womenOnly = false;
+      toast(t('已發佈，正在幫你配對同路線的同學', 'Posted. Matching classmates on your route'));
+      go('home');
+      timers.push(setTimeout(function () {
+        var rr = findRide(id);
+        if (!rr || rr.riders.length >= rr.seats) return;
+        var n = rr.gender === 'women' ? '小美' : '凱文';
+        rr.riders.push({ n: n, at: rr.stops[rr.stops.length - 1] });
+        toast(t(n + ' 加入了你的共乘', nm(n) + ' joined your ride'));
+        if (S.screen === 'home' || (S.screen === 'detail' && S.rideId === id)) render();
+      }, 3200));
+      return;
+    }
+    if (f.id === 'chatForm') {
+      var txt = document.getElementById('chatInput').value.trim();
+      if (!txt) return;
+      S.chat.push({ who: '你', text: txt }); render(); document.getElementById('chatInput').focus(); return;
+    }
+    if (f.id === 'helpForm') {
+      var q = document.getElementById('helpInput').value.trim();
+      if (!q) return;
+      S.help.push({ who: 'me', text: q }); render(); document.getElementById('helpInput').focus(); helpReply(q); return;
+    }
+    if (f.id === 'wishForm') {
+      var wd = S.wishDraft;
+      if (wd.from === wd.to) { toast(t('起點和終點不能一樣', 'Pick two different places')); return; }
+      var name = wd.note.trim() || (P(wd.from) + ' → ' + P(wd.to));
+      wishes.push({ id: 'w' + Date.now(), from: wd.from, to: wd.to, when: ['由你決定時間', 'Time to be set'], title: [name, name], votes: 1, goal: 8, mine: true });
+      S.wishDraft = { from: 'lib', to: 'ziqiang', note: '' };
+      toast(t('許願成功，還差 7 人就會自動開團', 'Wish posted. 7 more people to launch'));
+      render();
+    }
+  });
+
+  function tabGo(tb) {
+    if (tb === 'rides') go('home');
+    else if (tb === 'trip') { if (S.joined) go('trip'); else toast(t('目前沒有進行中的行程', 'No trip in progress')); }
+    else if (tb === 'wish') go('wish');
+    else if (tb === 'help') go('support');
+    else if (tb === 'me') go('me');
+  }
+  document.getElementById('tabbar').addEventListener('click', function (e) { var b = e.target.closest('.tab'); if (b) tabGo(b.dataset.tab); });
+  document.getElementById('fab').addEventListener('click', function () { go('post'); });
+  document.getElementById('backBtn').addEventListener('click', function () { go(S.screen === 'split' ? 'trip' : 'home'); });
+  document.getElementById('flow').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-flow]'); if (!b) return;
+    var f = b.dataset.flow;
+    if (f === 'signin') { S.codeSent = false; go('signin'); return; }
+    signedIn();
+    if (f === 'trip' || f === 'split') {
+      if (!ensureTrip()) return;
+      if (f === 'split') { S.taxi = true; var r = findRide(S.joined); S.meter = rideFare(r) + 5; S.payer = r.riders.filter(function (x) { return x.n !== '你'; })[0].n; }
+    }
+    go(f);
+  });
+
+  /* ---------- static text, language, QR ---------- */
+  var I18N = {
+    nameTbd: ['名稱待定', 'NAME TBD'], flowLbl: ['核心流程', 'Core flow'], featLbl: ['特色功能 · 點一下直接示範', 'Features · tap to demo'],
+    qrT: ['掃描開啟', 'Scan to open'], qrS: ['用手機掃描，馬上試用', 'Try it on your phone'], close: ['關閉', 'Close'], reset: ['重新開始', 'Restart'], fab: ['發起共乘', 'New ride']
+  };
+  function applyStatic() {
+    document.documentElement.lang = LANG === 'en' ? 'en' : 'zh-Hant-TW';
+    Array.prototype.forEach.call(document.querySelectorAll('[data-i18n]'), function (el) { var v = I18N[el.dataset.i18n]; if (v) el.textContent = t(v[0], v[1]); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-lang]'), function (b) { b.setAttribute('aria-pressed', String(b.dataset.lang === LANG)); });
+    document.getElementById('tagline').innerHTML = t('深夜沒公車？<br>同學一起搭，<em>30 幾塊</em>就上山。', 'No bus at night?<br>Share a cab, ride up for <em>NT$30-something</em>.');
+    document.getElementById('feats').innerHTML = FEATS.map(function (f) { return '<button class="feat" type="button" data-demo="' + f[0] + '"><b>' + t(f[1], f[2]) + '</b><span>' + t(f[3], f[4]) + '</span></button>'; }).join('');
+    var pill = document.getElementById('langPill');
+    pill.textContent = LANG === 'en' ? '中' : 'EN';
+    pill.setAttribute('aria-label', LANG === 'en' ? '切換成中文' : 'Switch to English');
+    document.getElementById('backBtn').setAttribute('aria-label', t('返回', 'Back'));
+  }
+  function setLang(l) { if (l === LANG) return; LANG = l; applyStatic(); render(); }
+  document.getElementById('feats').addEventListener('click', function (e) { var b = e.target.closest('[data-demo]'); if (b) demo(b.dataset.demo); });
+  document.getElementById('langPill').addEventListener('click', function () { setLang(LANG === 'en' ? 'zh' : 'en'); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-lang]'), function (b) { b.addEventListener('click', function () { setLang(b.dataset.lang); }); });
+  document.getElementById('resetBtn').addEventListener('click', function () {
+    timers.forEach(clearTimeout); timers = [];
+    S = fresh(); rides = seedRides(); wishes = seedWishes(); lastScreen = null; toastEl.hidden = true; render();
+  });
+  var qrOver = document.getElementById('qrOver');
+  document.getElementById('qrBtn').addEventListener('click', function () { qrOver.hidden = false; document.getElementById('qrClose').focus(); });
+  document.getElementById('qrClose').addEventListener('click', function () { qrOver.hidden = true; document.getElementById('qrBtn').focus(); });
+  qrOver.addEventListener('click', function (e) { if (e.target === qrOver) qrOver.hidden = true; });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !qrOver.hidden) qrOver.hidden = true; });
+
+  applyStatic();
+  render();
+})();
+</script>
+
+</body>
+</html>
