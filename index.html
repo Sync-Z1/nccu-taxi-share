@@ -326,7 +326,7 @@ select.input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://ww
 .tile { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; text-align: center; min-width: 0; }
 .tile b { font-family: var(--mono); font-size: 20px; }
 .tile span { font-size: 12px; color: var(--muted); font-weight: 700; }
-.tile.green b { color: var(--green); }
+.tile.eco b { color: var(--green); }
 .stars { display: flex; gap: 4px; justify-content: center; }
 .star { border: 0; background: transparent; padding: 3px; color: var(--street); }
 .star svg { width: 32px; height: 32px; }
@@ -457,7 +457,7 @@ select.input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://ww
     gen: { zh: '綜合院館', en: 'General Building', g: 'low', br: 'low', km: 0.5, x: 232, y: 150 },
     zhuangjing: { zh: '莊敬宿舍', en: 'Zhuangjing Dorms', g: 'hill', br: 'hill', km: 1.4, x: 262, y: 84 },
     ziqiang: { zh: '自強宿舍', en: 'Ziqiang Dorms', g: 'hill', br: 'hill', km: 1.8, x: 300, y: 56 },
-    zoo: { zh: '動物園站', en: 'Taipei Zoo Station', g: 'off', br: 'zoo', km: 1.2, x: 70, y: 174, icon: 'metro' },
+    zoo: { zh: '動物園站', en: 'Taipei Zoo Station', g: 'off', br: 'zoo', km: 1.2, x: 70, y: 174, icon: 'metro', below: true },
     wanfang: { zh: '萬芳醫院站', en: 'Wanfang Hospital Station', g: 'off', br: 'wf', km: 2.6, x: 52, y: 92, icon: 'metro' },
     arena: { zh: '台北小巨蛋', en: 'Taipei Arena', g: 'off', br: 'arena', km: 9, x: 112, y: 14, icon: 'music', far: true },
     main: { zh: '台北車站', en: 'Taipei Main Station', g: 'off', br: 'main', km: 13.5, x: 18, y: 18, icon: 'train', far: true },
@@ -610,7 +610,7 @@ select.input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://ww
     var pts = stops.concat([dest]).map(function (k) { return PLACES[k]; });
     var d = pts.map(function (p, i) { return (i ? 'L' : 'M') + p.x + ' ' + p.y; }).join(' ');
     var lbl = function (p, txt, anchor) {
-      var x = Math.min(Math.max(p.x, 8), 332), y = p.y + (p.y < 30 ? 22 : -12);
+      var x = Math.min(Math.max(p.x, 8), 332), y = p.below ? Math.min(p.y + 21, 195) : p.y + (p.y < 30 ? 22 : -12);
       return '<text x="' + x + '" y="' + y + '" text-anchor="' + anchor + '" font-family="Noto Sans TC, PingFang TC, sans-serif" font-size="11.5" font-weight="700" fill="#13203C" paint-order="stroke" stroke="#F1EEE4" stroke-width="4">' + esc(txt) + '</text>';
     };
     var anchorFor = function (p) { return p.x > 260 ? 'end' : p.x < 80 ? 'start' : 'middle'; };
@@ -820,7 +820,7 @@ select.input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://ww
     for (var i = 1; i <= 5; i++) stars += '<button class="star' + (i <= S.rating ? ' on' : '') + '" type="button" data-act="rate" data-v="' + i + '" aria-label="' + i + t(' 顆星', ' stars') + '">' + ICON.star + '</button>';
     return '<div class="done-top"><div class="done-badge">' + ICON.check + '</div><h2 class="h">' + t('付款完成', 'Paid') + '</h2><p class="sub" style="color:#C3CBDD">' + t('謝謝你一起共乘', 'Thanks for sharing the ride') + '</p></div>' +
       '<div class="checker"></div><div class="pad">' +
-      '<div class="tiles"><div class="tile"><b>' + money(L.saved) + '</b><span>' + t('這趟省下', 'Saved') + '</span></div><div class="tile green"><b>' + L.co2 + '</b><span>' + t('kg 減碳', 'kg CO₂ cut') + '</span></div><div class="tile green"><b>+' + L.pts + '</b><span>' + t('綠色點數', 'Green points') + '</span></div></div>' +
+      '<div class="tiles"><div class="tile"><b>' + money(L.saved) + '</b><span>' + t('這趟省下', 'Saved') + '</span></div><div class="tile eco"><b>' + L.co2 + '</b><span>' + t('kg 減碳', 'kg CO₂ cut') + '</span></div><div class="tile eco"><b>+' + L.pts + '</b><span>' + t('綠色點數', 'Green points') + '</span></div></div>' +
       '<div class="card" style="align-items:center;text-align:center"><p class="lbl">' + t('幫這趟評分', 'Rate this ride') + '</p><div class="stars">' + stars + '</div><p class="sub">' + t('互評會影響彼此的信用分數', 'Ratings shape everyone’s trust score') + '</p></div>' +
       '<button class="btn dark block" type="button" data-act="tab" data-tab="me">' + ICON.leaf + t('用點數兌換優惠', 'Redeem points') + '</button>' +
       '<button class="btn primary block" type="button" data-act="home">' + t('完成', 'Done') + '</button></div>';
