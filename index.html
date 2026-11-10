@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="政大計程車共乘 Demo：課表順風車、多點上車、安心同行、許願池、綠色點數。">
+<meta name="description" content="PickPeak：政大學生專屬的計程車共乘媒合 Demo。">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>政大計程車共乘 Demo</title>
+<title>PickPeak Demo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Chivo+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
@@ -57,7 +57,9 @@ button { cursor: pointer; }
 
 /* ---------- Presenter guide ---------- */
 .guide { display: flex; flex-direction: column; gap: 26px; min-width: 0; padding-top: 8px; }
-.namebox { width: min(100%, 340px); height: 88px; border: 2px dashed var(--stage-line); border-radius: 18px; display: grid; place-items: center; color: var(--stage-muted); font-size: 13px; letter-spacing: .14em; }
+.wordmark { font-family: var(--display); font-weight: 800; font-size: clamp(56px, 7vw, 88px); line-height: .95; letter-spacing: -.035em; display: flex; align-items: flex-end; gap: 10px; }
+.wordmark .wm span { color: var(--yellow); }
+.wordmark svg { width: .62em; height: .62em; flex: none; margin-bottom: .1em; }
 .tagline { font-family: var(--display); font-weight: 800; font-size: clamp(30px, 3.6vw, 44px); line-height: 1.08; letter-spacing: -.02em; text-wrap: balance; max-width: 15em; }
 .tagline em { font-style: normal; color: var(--yellow); white-space: nowrap; }
 .glabel { font-size: 12px; font-weight: 700; letter-spacing: .16em; color: var(--stage-muted); text-transform: uppercase; }
@@ -180,7 +182,9 @@ select.input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://ww
 
 /* Sign in */
 .si-top { background: var(--navy); color: var(--paper); padding: 16px 22px 22px; display: flex; flex-direction: column; gap: 14px; }
-.si-name { width: 170px; height: 44px; border: 2px dashed rgba(255, 255, 255, .35); border-radius: 12px; }
+.si-name { font-family: var(--display); font-weight: 800; font-size: 34px; letter-spacing: -.03em; line-height: 1; display: flex; align-items: flex-end; gap: 6px; }
+.si-name .wm span { color: var(--yellow); }
+.si-name svg { width: 22px; height: 22px; margin-bottom: 3px; }
 .si-top h2 { font-family: var(--display); font-size: 32px; line-height: 1.1; font-weight: 800; letter-spacing: -.01em; }
 .si-top h2 em { font-style: normal; color: var(--yellow); }
 .si-top p { color: #C3CBDD; font-size: 14px; }
@@ -397,8 +401,7 @@ select.input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://ww
 <div class="topband" aria-hidden="true"></div>
 <div class="stage">
   <aside class="guide" aria-label="Demo">
-    <div class="namebox" data-i18n="nameTbd">名稱待定</div>
-    <p class="tagline" id="tagline"></p>
+    <h1 class="wordmark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 21l7.5-13 4 6.5 2.5-4L22 21z" fill="#F5B700"/><path d="M9.5 8l1.6 2.7-1.6 1-1.6-1z" fill="#F4F2EB"/></svg><span class="wm">Pick<span>Peak</span></span></h1>
     <section style="display:grid;gap:10px">
       <p class="glabel" data-i18n="flowLbl">核心流程</p>
       <div class="flow" id="flow"></div>
@@ -520,7 +523,7 @@ select.input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://ww
       screen: 'signin', codeSent: false, email: '113207001@nccu.edu.tw', filter: 'all', womenOnly: false,
       rideId: null, pick: null, joined: null, taxi: false, meter: 0, mode: 'equal', payMode: 'equal', rating: 0,
       saved: 0, pts: 180, co2: 3.2, member: false, redeemed: {}, last: null,
-      share: true, campus: false, record: true, chat: [], help: [{ who: 'bot', text: ['你好！我是小幫手，有任何共乘問題都可以問我。', 'Hi! I am the assistant. Ask me anything about sharing a ride.'] }], agent: false,
+      share: true, campus: false, record: true, chat: [], help: [{ who: 'bot', text: ['你好！我是 PickPeak 小幫手，有任何共乘問題都可以問我。', 'Hi! I am the PickPeak assistant. Ask me anything about sharing a ride.'] }], agent: false,
       draft: { stops: ['zoo'], dest: 'ziqiang', time: '22:40', seats: 4, luggage: 0, event: '', gender: 'any', driver: 'any', mode: 'equal', note: '' },
       wishDraft: { from: 'lib', to: 'ziqiang', note: '' }, flashId: null, gDefault: 'any'
     };
@@ -633,8 +636,7 @@ select.input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://ww
 
   /* ---------- screens ---------- */
   function signin() {
-    return '<div class="si-top"><div class="si-name" aria-hidden="true"></div>' +
-      '<h2>' + t('一起搭，<em>30 幾塊</em>就上山', 'Share the cab.<br><em>NT$30-something</em> up the hill.') + '</h2>' +
+    return '<div class="si-top"><div class="si-name"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 21l7.5-13 4 6.5 2.5-4L22 21z" fill="#F5B700"/><path d="M9.5 8l1.6 2.7-1.6 1-1.6-1z" fill="#F4F2EB"/></svg><span class="wm">Pick<span>Peak</span></span></div>' +
       '<p>' + t('政大學生專屬的計程車共乘媒合', 'Taxi sharing just for NCCU students') + '</p></div>' +
       '<div class="checker"></div><div class="pad">' +
       '<form id="signinForm" class="card" novalidate>' +
@@ -1027,7 +1029,7 @@ select.input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://ww
     if (a === 'calltaxi') { S.taxi = true; S.chat.push({ sys: true, text: ['已透過合作車隊叫車 ' + PLATE, 'Partner taxi booked ' + PLATE] }); toast(t('已叫車', 'Taxi booked')); render(); return; }
     if (a === 'sharelink') {
       var tr = findRide(S.joined);
-      var text = t('我正在共乘：' + tr.time + ' ' + P(tr.stops[0]) + ' → ' + P(tr.dest) + '，車牌 ' + PLATE + '。即時位置：', 'I am sharing a ride: ' + tr.time + ' ' + P(tr.stops[0]) + ' → ' + P(tr.dest) + ', plate ' + PLATE + '. Live location: ') + 'share.example/trip/8F2K';
+      var text = t('我正在用 PickPeak 共乘：' + tr.time + ' ' + P(tr.stops[0]) + ' → ' + P(tr.dest) + '，車牌 ' + PLATE + '。即時位置：', 'I am sharing a PickPeak ride: ' + tr.time + ' ' + P(tr.stops[0]) + ' → ' + P(tr.dest) + ', plate ' + PLATE + '. Live location: ') + 'share.example/trip/8F2K';
       var ok = function () { toast(t('已複製行程連結', 'Trip link copied')); }, fail = function () { toast(text); };
       try { navigator.clipboard.writeText(text).then(ok, fail); } catch (err) { fail(); }
       return;
@@ -1176,14 +1178,13 @@ select.input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://ww
 
   /* ---------- static text, language, QR ---------- */
   var I18N = {
-    nameTbd: ['名稱待定', 'NAME TBD'], flowLbl: ['核心流程', 'Core flow'], featLbl: ['特色功能 · 點一下直接示範', 'Features · tap to demo'],
+    flowLbl: ['核心流程', 'Core flow'], featLbl: ['特色功能 · 點一下直接示範', 'Features · tap to demo'],
     qrT: ['掃描開啟', 'Scan to open'], qrS: ['用手機掃描，馬上試用', 'Try it on your phone'], close: ['關閉', 'Close'], reset: ['重新開始', 'Restart'], fab: ['發起共乘', 'New ride']
   };
   function applyStatic() {
     document.documentElement.lang = LANG === 'en' ? 'en' : 'zh-Hant-TW';
     Array.prototype.forEach.call(document.querySelectorAll('[data-i18n]'), function (el) { var v = I18N[el.dataset.i18n]; if (v) el.textContent = t(v[0], v[1]); });
     Array.prototype.forEach.call(document.querySelectorAll('[data-lang]'), function (b) { b.setAttribute('aria-pressed', String(b.dataset.lang === LANG)); });
-    document.getElementById('tagline').innerHTML = t('深夜沒公車？<br>同學一起搭，<em>30 幾塊</em>就上山。', 'No bus at night?<br>Share a cab, ride up for <em>NT$30-something</em>.');
     document.getElementById('feats').innerHTML = FEATS.map(function (f) { return '<button class="feat" type="button" data-demo="' + f[0] + '"><b>' + t(f[1], f[2]) + '</b><span>' + t(f[3], f[4]) + '</span></button>'; }).join('');
     var pill = document.getElementById('langPill');
     pill.textContent = LANG === 'en' ? '中' : 'EN';
